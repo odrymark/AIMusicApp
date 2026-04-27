@@ -26,6 +26,15 @@ services:
     networks:
       - app-network
 
+  ai_backend:
+    image: ghcr.io/odrymark/aimusicapp/ai_backend:latest
+    build:
+      context: ./server/AI_backend
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - app-network
+
   client:
     image: ghcr.io/odrymark/aimusicapp/client:latest
     build:
