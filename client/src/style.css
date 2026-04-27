@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+    themes: all;
+}
+
+@plugin "daisyui/theme" {
+    name: ruby;
+    default: false;
+
+    --color-primary:          oklch(62% 0.22 25);
+    --color-primary-content:  oklch(98% 0.02 60);
+
+    --color-primary-focus:    oklch(54% 0.22 25);
+
+    --color-secondary:        oklch(68% 0.18 340);
+    --color-secondary-content:oklch(98% 0.01 60);
+
+    --color-accent:           oklch(78% 0.14 80);
+    --color-accent-content:   oklch(20% 0.04 60);
+
+    --color-base-100:         oklch(12% 0.02 260);
+    --color-base-200:         oklch(10% 0.015 260);
+    --color-base-300:         oklch(8% 0.02 260);
+    --color-base-content:     oklch(95% 0.03 260);
+
+    --color-neutral:          oklch(18% 0.04 260);
+    --color-neutral-content:  oklch(94% 0.02 260);
+
+    --color-info:             oklch(72% 0.16 220);
+    --color-success:          oklch(68% 0.18 145);
+    --color-warning:          oklch(78% 0.17 80);
+    --color-error:            oklch(64% 0.24 25);
+
+    /* Radius & animation */
+    --rounded-box:            1rem;
+    --rounded-btn:            0.9rem;
+    --rounded-badge:          1.9rem;
+
+    --animation-btn:          0.2s;
+    --btn-text-case:          normal-case;
+}

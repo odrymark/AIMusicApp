@@ -1,0 +1,41 @@
+# --------------------------
+# Python ignores
+# --------------------------
+.venv/
+__pycache__/
+*.py[cod]
+.idea/
+.env
+.env.*
+
+# --------------------------
+# .NET / C# ignores
+# --------------------------
+**/bin/
+**/obj/
+**/.idea/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.user
+*.suo
+*.userosscache
+.vscode/
+.vs/
+**/appsettings.Development.json
+**/api.json
+**/featurehub/
+.env
+**/.env
+
+# --------------------------
+# Node / React ignores
+# --------------------------
+client/node_modules/
+client/build/
+client/dist/
+client/.env
+npm-debug.log
+yarn-error.log
+

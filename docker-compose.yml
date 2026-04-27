@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  api:
+    image: ghcr.io/odrymark/aimusicapp/api:latest
+    build:
+      context: ./server
+      dockerfile: Api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRINGS__DEFAULTCONNECTION}
+      - Jwt__Key=${JWT__KEY}
+      - Jwt__Issuer=${JWT__ISSUER}
+      - Jwt__Audience=${JWT__AUDIENCE}
+      - Jwt__ExpireMinutes=${JWT__EXPIREMINUTES}
+      - RefreshToken__ExpireDays=${REFRESHTOKEN__EXPIREDAYS}
+      - R2__AccessKey=${R2__ACCESSKEY}
+      - R2__SecretKey=${R2__SECRETKEY}
+      - R2__BucketName=${R2__BUCKETNAME}
+      - R2__Endpoint=${R2__ENDPOINT}
+      - FeatureHub__Url=${FEATUREHUB__URL}
+      - FeatureHub__SdkKey=${FEATUREHUB__SDKKEY}
+    restart: always
+    networks:
+      - app-network
+
+  client:
+    image: ghcr.io/odrymark/aimusicapp/client:latest
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - app-network
+
+  featurehub:
+    image: featurehub/party-server:latest
+    restart: always
+    volumes:
+      - ./server/featurehub:/db
+    ports:
+      - "8085:8085"
+    networks:
+      - app-network
+    environment:
+      - PORT=8085
+
+networks:
+  app-network:
+    driver: bridge

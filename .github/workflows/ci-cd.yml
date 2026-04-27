@@ -1,0 +1,210 @@
+name: CI-CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ConnectionStrings__DefaultConnection: ${{ secrets.NEON_STAGING_CONNECTION_STRING }}
+    outputs:
+      app_version: ${{ steps.app-v.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Application Version
+        id: app-v
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          bump_each_commit: true
+
+      - name: Setup .NET 9 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install tools
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Start static code analysis
+        run: |
+          dotnet sonarscanner begin \
+            /k:"${{ secrets.SONARQUBE_KEY }}" \
+            /d:sonar.host.url="${{ secrets.SONARQUBE_URL }}" \
+            /d:sonar.token="${{ secrets.SONARQUBE_TOKEN }}" \
+            /v:"${{ steps.app-v.outputs.version }}" \
+            /d:sonar.coverageReportPaths="coverage-report/SonarQube.xml" \
+            /d:sonar.qualitygate.wait=true \
+            /d:sonar.exclusions="client/**,**/Migrations/**,k6/**,testcafe/**,**/Dockerfile" \
+            /d:sonar.coverage.exclusions="**/DTOs/**,**/*Dto.cs,**/Program.cs,**/DataAccess/**"
+
+      - name: Build & Test
+        run: |
+          dotnet restore server/server.sln
+          dotnet build server/server.sln --configuration Release --no-restore
+          dotnet test server/server.sln --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Complete static code analysis
+        run: |
+          reportgenerator -reports:TestResults/**/coverage.cobertura.xml -targetdir:coverage-report -reporttypes:SonarQube
+          dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARQUBE_TOKEN }}"
+
+  deploy-db:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Apply Migrations
+        run: |
+          dotnet tool install --global dotnet-ef
+
+          dotnet restore server/server.sln
+
+          dotnet ef migrations bundle --project server/DataAccess --startup-project server/Api --output migration-bundle --self-contained
+          
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ./migration-bundle --connection "${{ secrets.NEON_PRODUCTION_CONNECTION_STRING }}"
+          else
+            ./migration-bundle --connection "${{ secrets.NEON_STAGING_CONNECTION_STRING }}"
+          fi
+
+  deploy-app:
+    runs-on: ubuntu-latest
+    needs: [build, deploy-db]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker images
+        run: |
+          VERSION=${{ needs.build.outputs.app_version }}
+          
+          docker buildx build \
+            --provenance=false \
+            -t ghcr.io/odrymark/musicapp/api:latest \
+            -t ghcr.io/odrymark/musicapp/api:$VERSION \
+            -f ./server/Api/Dockerfile \
+            --push ./server
+          
+          docker buildx build \
+            --provenance=false \
+            -t ghcr.io/odrymark/musicapp/client:latest \
+            -t ghcr.io/odrymark/musicapp/client:$VERSION \
+            -f ./client/Dockerfile \
+            --push ./client
+
+      - name: Create release notes
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ needs.build.outputs.app_version }}
+          generateReleaseNotes: true
+
+      - name: Copy docker-compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "/var/www/app/MusicApp/"
+          overwrite: true
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/app/MusicApp
+            docker-compose pull
+            docker-compose up -d
+
+  vps-smoke-tests:
+    runs-on: ubuntu-latest
+    needs: deploy-app
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Switch to staging env
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/app/MusicApp
+            cp ../.env.Staging .env
+            docker-compose up -d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run TestCafe against VPS
+        run: |
+          npx testcafe "firefox:headless --disable-native-automation" \
+          testcafe/home_test.js \
+          testcafe/upload_song_test.js \
+          --screenshots takeOnFails \
+          --screenshots-path screenshots/
+        env:
+          BASE_URL: http://${{ secrets.VPS_HOST }}
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vps-test-failures
+          path: screenshots/
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run k6 Auth Test
+        run: k6 run k6/auth_test.js
+        env:
+          BASE_URL: http://${{ secrets.VPS_HOST }}:8080
+
+      - name: Run k6 Song Test
+        run: k6 run k6/song_test.js
+        env:
+          BASE_URL: http://${{ secrets.VPS_HOST }}:8080
+
+      - name: Restore production env
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/app/MusicApp
+            cp ../.env.Production .env
+            docker-compose up -d
