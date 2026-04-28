@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System.Security.Claims;
+using Api.Services.AI;
 
 namespace Test.ControllerTests.SongTests;
 
@@ -17,6 +18,7 @@ public class SongControllerStartup
         services.AddSingleton(Substitute.For<ISongService>());
         services.AddSingleton(Substitute.For<IR2Service>());
         services.AddSingleton(Substitute.For<IFeatureStateProvider>());
+        services.AddSingleton(Substitute.For<IAiService>());
         services.AddTransient<SongController>();
         services.AddSingleton(this);
     }

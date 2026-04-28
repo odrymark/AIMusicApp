@@ -62,6 +62,7 @@ public abstract class TestBase : IAsyncLifetime
         string songKey = "test-key",
         string artist = "Test Artist",
         bool isPublic = true,
+        string mood = "happy",
         string? image = null)
     {
         var song = new Song
@@ -72,6 +73,7 @@ public abstract class TestBase : IAsyncLifetime
             songKey = songKey,
             artist = artist,
             isPublic = isPublic,
+            mood = mood,
             image = image
         };
 

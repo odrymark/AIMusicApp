@@ -27,7 +27,7 @@ public class SongServiceTests(MusicDbContext db, ISongService songService) : Tes
     {
         var user = await CreateUserAsync("song_fields_" + Guid.NewGuid().ToString("N"));
 
-        await songService.CreateSong(user.id, "My Song", "song-key", "Artist", true, "image.jpg");
+        await songService.CreateSong(user.id, "My Song", "song-key", "Artist", true, "some-mood", "image.jpg");
 
         var song = Db.Songs.First(s => s.userId == user.id);
         Assert.Equal("My Song", song.title);
