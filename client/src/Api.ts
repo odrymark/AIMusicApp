@@ -479,6 +479,9 @@ export class Api<
         file?: File | null;
         title?: string | null;
         artist?: string | null;
+        lyrics?: string | null;
+        /** @format int32 */
+        bpm?: number;
         isPublic?: boolean;
         /** @format binary */
         image?: File | null;

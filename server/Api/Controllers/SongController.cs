@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Api.DTOs.Request;
 using Api.Services;
+using Api.Services.AI;
 using Api.Services.R2;
 using Api.Services.Song;
 using FHHelper;
@@ -12,7 +13,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/song")]
-public class SongController(IR2Service r2Service, ISongService songService, IFeatureStateProvider stateProvider) : ControllerBase
+public class SongController(IR2Service r2Service, ISongService songService, IAiService aiService, IFeatureStateProvider stateProvider) : ControllerBase
 {
     [Authorize]
     [HttpPost("uploadSong")]
@@ -33,8 +34,10 @@ public class SongController(IR2Service r2Service, ISongService songService, IFea
             {
                 imgKey = await r2Service.UploadImageStorage(dto.image);
             }
+            
+            var mood = await aiService.GetSongMood(dto.lyrics, dto.bpm);
 
-            await songService.CreateSong(id, dto.title, songKey, dto.artist, dto.isPublic, imgKey);
+            await songService.CreateSong(id, dto.title, songKey, dto.artist, dto.isPublic, mood, imgKey);
 
             return Ok();
         }

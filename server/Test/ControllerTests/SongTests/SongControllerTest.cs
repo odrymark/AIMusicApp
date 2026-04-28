@@ -36,7 +36,9 @@ public class SongControllerTests(
             file = mockSongFile, 
             image = mockImgFile, 
             artist = "AI Artist",
-            isPublic = true 
+            isPublic = true,
+            lyrics = "Lyrics",
+            bpm = 123,
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-123");
@@ -67,7 +69,9 @@ public class SongControllerTests(
             file = mockSongFile, 
             image = null,
             artist = "Artist Name",
-            isPublic = false 
+            isPublic = false,
+            lyrics = "Lyrics",
+            bpm = 123
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-789");
@@ -94,7 +98,9 @@ public class SongControllerTests(
             file = mockSongFile, 
             image = null,
             artist = "Artist",
-            isPublic = true 
+            isPublic = true,
+            lyrics = "Lyrics",
+            bpm = 123
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).ThrowsAsync(new Exception("Upload failed"));

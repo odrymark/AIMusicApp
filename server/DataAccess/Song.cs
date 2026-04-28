@@ -17,6 +17,9 @@ public class Song
     
     [MaxLength(100)]
     public required string artist { get; set; }
+    
+    [Required]
+    public string mood { get; set; }
 
     [Required]
     [MaxLength(100)]

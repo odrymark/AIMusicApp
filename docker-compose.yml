@@ -1,8 +1,6 @@
 version: '3.8'
-
 services:
   api:
-    image: ghcr.io/odrymark/aimusicapp/api:latest
     build:
       context: ./server
       dockerfile: Api/Dockerfile
@@ -26,17 +24,39 @@ services:
     networks:
       - app-network
 
+  ollama:
+    image: ollama/ollama
+    restart: always
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app-network
+
+  ollama-init:
+    image: ollama/ollama
+    depends_on:
+      - ollama
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./server/AI_backend/Modelfile:/Modelfile
+    networks:
+      - app-network
+    entrypoint: ["/bin/sh", "-c", "sleep 5 && ollama create song-mood-classifier -f /Modelfile"]
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    restart: "no"
+
   ai_backend:
-    image: ghcr.io/odrymark/aimusicapp/ai_backend:latest
     build:
       context: ./server/AI_backend
       dockerfile: Dockerfile
+    depends_on:
+      - ollama-init
     restart: always
     networks:
       - app-network
 
   client:
-    image: ghcr.io/odrymark/aimusicapp/client:latest
     build:
       context: ./client
       dockerfile: Dockerfile
@@ -63,3 +83,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  ollama_data:
