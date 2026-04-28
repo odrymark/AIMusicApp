@@ -83,6 +83,13 @@ public class Seeder(MusicDbContext ctx) : ISeeder
             "Artist Three",
         };
 
+        var moods = new[]
+        {
+            "Happy",
+            "Sad",
+            "Energetic"
+        };
+
         for (int i = 0; i < songTitles.Length; i++)
         {
             ctx.Songs.Add(new Song
@@ -93,6 +100,7 @@ public class Seeder(MusicDbContext ctx) : ISeeder
                 artist = artists[i],
                 songKey = $"songs/test-{user.username}-{i + 1}.mp3",
                 isPublic = i == 0,
+                mood = moods[i],
                 image = null
             });
         }

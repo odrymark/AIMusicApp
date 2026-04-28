@@ -1,6 +1,7 @@
 using Api.Controllers;
 using Api.DTOs.Request;
 using Api.DTOs.Response;
+using Api.Services.AI;
 using Api.Services.Song;
 using Api.Services.R2;
 using FHHelper;
@@ -17,6 +18,7 @@ public class SongControllerTests(
     ISongService mockSongService,
     IR2Service mockR2Service,
     IFeatureStateProvider mockStateProvider,
+    IAiService mockAiService,
     IServiceProvider provider)
 {
     private readonly SongController _controller = SongControllerStartup.GetController(provider);
@@ -43,13 +45,14 @@ public class SongControllerTests(
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-123");
         mockR2Service.UploadImageStorage(mockImgFile).Returns("img-key-456");
+        mockAiService.GetSongMood(dto.lyrics, dto.bpm).Returns("happy");
 
         var result = await _controller.UploadSong(dto);
 
         Assert.IsType<OkResult>(result);
         await mockR2Service.Received(1).UploadSongStorage(mockSongFile);
         await mockR2Service.Received(1).UploadImageStorage(mockImgFile);
-        await mockSongService.Received(1).CreateSong(userId, dto.title, "song-key-123", dto.artist, dto.isPublic, "img-key-456");
+        await mockSongService.Received(1).CreateSong(userId, dto.title, "song-key-123", dto.artist, dto.isPublic, "happy","img-key-456");
     }
 
     [Fact]
@@ -75,13 +78,15 @@ public class SongControllerTests(
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-789");
+        mockAiService.GetSongMood(dto.lyrics, dto.bpm).Returns("happy");
+
 
         var result = await _controller.UploadSong(dto);
 
         Assert.IsType<OkResult>(result);
         await mockR2Service.Received(1).UploadSongStorage(mockSongFile);
         await mockR2Service.DidNotReceive().UploadImageStorage(Arg.Any<IFormFile>());
-        await mockSongService.Received(1).CreateSong(userId, dto.title, "song-key-789", dto.artist, dto.isPublic, null);
+        await mockSongService.Received(1).CreateSong(userId, dto.title, "song-key-789", dto.artist, dto.isPublic, "happy", null);
     }
 
     [Fact]
@@ -170,11 +175,12 @@ public class SongControllerTests(
     [Fact]
     public void GetSignedUrl_Returns_Ok_With_Url()
     {
+        mockR2Service.ClearReceivedCalls();
+        mockR2Service.GenerateSignedUrl(Arg.Any<string>()).Returns("https://signed-url.com");
+
         var key = "some-file-key";
-        mockR2Service.GenerateSignedUrl(key).Returns("https://signed-url.com");
-
         var result = _controller.GetSignedUrl(key);
-
+        
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal("https://signed-url.com", okResult.Value);
     }
