@@ -1,5 +1,6 @@
 using System.Text;
 using Api;
+using Api.Services.AI;
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Api.Services.Auth;
@@ -19,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("http://localhost:5173", "http://167.86.77.173")
+        policy => policy.WithOrigins("http://localhost", "http://167.86.77.173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
@@ -76,6 +77,12 @@ builder.Services.AddSingleton<IFeatureStateProvider>(
     new FeatureStateProvider(featureHubUrl!, sdkKey!)
 );
 
+builder.Services.AddHttpClient("AiBackend", client =>
+{
+    client.BaseAddress = new Uri("http://ai_backend:8000");
+    client.Timeout = TimeSpan.FromMinutes(3);
+});
+
 builder.Services.AddScoped<ISeeder, Seeder>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -84,6 +91,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IR2Service, R2Service>();
 builder.Services.AddScoped<ISongService, SongService>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
+builder.Services.AddScoped<IAiService, AiService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApiDocument();
 

@@ -16,7 +16,7 @@ public class SongServiceTests(MusicDbContext db, ISongService songService) : Tes
     {
         var user = await CreateUserAsync("song_create_" + Guid.NewGuid().ToString("N"));
 
-        await songService.CreateSong(user.id, "My Song", "song-key", "Artist", true);
+        await songService.CreateSong(user.id, "My Song", "song-key", "Artist", true, "mood");
 
         var song = Db.Songs.FirstOrDefault(s => s.userId == user.id);
         Assert.NotNull(song);
@@ -42,7 +42,7 @@ public class SongServiceTests(MusicDbContext db, ISongService songService) : Tes
     {
         var user = await CreateUserAsync("song_noimage_" + Guid.NewGuid().ToString("N"));
 
-        await songService.CreateSong(user.id, "My Song", "song-key", "Artist", false);
+        await songService.CreateSong(user.id, "My Song", "song-key", "Artist", false, "mood");
 
         var song = Db.Songs.First(s => s.userId == user.id);
         Assert.Null(song.image);
@@ -54,7 +54,7 @@ public class SongServiceTests(MusicDbContext db, ISongService songService) : Tes
         var user = await CreateUserAsync("song_notitle_" + Guid.NewGuid().ToString("N"));
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            songService.CreateSong(user.id, "", "song-key", "Artist", true));
+            songService.CreateSong(user.id, "", "song-key", "Artist", true, "mood"));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class SongServiceTests(MusicDbContext db, ISongService songService) : Tes
         var user = await CreateUserAsync("song_wstitle_" + Guid.NewGuid().ToString("N"));
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            songService.CreateSong(user.id, "   ", "song-key", "Artist", true));
+            songService.CreateSong(user.id, "   ", "song-key", "Artist", true, "mood"));
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class SongServiceTests(MusicDbContext db, ISongService songService) : Tes
         var user = await CreateUserAsync("song_nokey_" + Guid.NewGuid().ToString("N"));
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            songService.CreateSong(user.id, "My Song", "", "Artist", true));
+            songService.CreateSong(user.id, "My Song", "", "Artist", true, "mood"));
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class SongServiceTests(MusicDbContext db, ISongService songService) : Tes
         var user = await CreateUserAsync("song_wskey_" + Guid.NewGuid().ToString("N"));
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            songService.CreateSong(user.id, "My Song", "   ", "Artist", true));
+            songService.CreateSong(user.id, "My Song", "   ", "Artist", true, "mood"));
     }
 
     // -------------------------

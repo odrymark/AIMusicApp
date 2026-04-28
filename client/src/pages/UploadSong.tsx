@@ -12,6 +12,9 @@ export default function UploadSong() {
     const [isPublic, setIsPublic] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
+    const [lyrics, setLyrics] = useState("");
+    const [bpm, setBpm] = useState<number>(0);
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0] ?? null;
         setImage(selected);
@@ -30,7 +33,7 @@ export default function UploadSong() {
 
         try {
             setIsUploading(true);
-            await uploadSong(file, title, artist, isPublic, image ?? undefined);
+            await uploadSong(file, title, artist, isPublic, lyrics, bpm, image ?? undefined);
             alert("Song uploaded successfully!");
             setFile(null);
             setImage(null);
@@ -87,6 +90,31 @@ export default function UploadSong() {
                                 className="input input-bordered w-full"
                                 value={artist}
                                 onChange={(e) => setArtist(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="form-control w-full mt-4">
+                            <label className="label">
+                                <span className="label-text">BPM</span>
+                            </label>
+                            <input
+                                type="number"
+                                placeholder="Enter BPM"
+                                className="input input-bordered w-full"
+                                value={bpm}
+                                onChange={(e) => setBpm(Number(e.target.value))}
+                            />
+                        </div>
+
+                        <div className="form-control w-full mt-4">
+                            <label className="label">
+                                <span className="label-text">Lyrics <span className="text-base-content/40">(optional)</span></span>
+                            </label>
+                            <textarea
+                                placeholder="Paste lyrics here..."
+                                className="textarea textarea-bordered w-full h-32"
+                                value={lyrics}
+                                onChange={(e) => setLyrics(e.target.value)}
                             />
                         </div>
 
