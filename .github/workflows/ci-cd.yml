@@ -105,17 +105,24 @@ jobs:
           
           docker buildx build \
             --provenance=false \
-            -t ghcr.io/odrymark/musicapp/api:latest \
-            -t ghcr.io/odrymark/musicapp/api:$VERSION \
+            -t ghcr.io/odrymark/aimusicapp/api:latest \
+            -t ghcr.io/odrymark/aimusicapp/api:$VERSION \
             -f ./server/Api/Dockerfile \
             --push ./server
           
           docker buildx build \
             --provenance=false \
-            -t ghcr.io/odrymark/musicapp/client:latest \
-            -t ghcr.io/odrymark/musicapp/client:$VERSION \
+            -t ghcr.io/odrymark/aimusicapp/client:latest \
+            -t ghcr.io/odrymark/aimusicapp/client:$VERSION \
             -f ./client/Dockerfile \
             --push ./client
+
+          docker buildx build \
+            --provenance=false \
+            -t ghcr.io/odrymark/aimusicapp/ai_backend:latest \
+            -t ghcr.io/odrymark/aimusicapp/ai_backend:$VERSION \
+            -f ./server/AI_backend/Dockerfile \
+            --push ./server/AI_backend
 
       - name: Create release notes
         uses: ncipollo/release-action@v1
@@ -130,7 +137,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "docker-compose.yml"
-          target: "/var/www/app/MusicApp/"
+          target: "/var/www/app/AIMusicApp/"
           overwrite: true
 
       - name: Deploy to VPS
@@ -140,7 +147,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /var/www/app/MusicApp
+            cd /var/www/app/AIMusicApp
             docker-compose pull
             docker-compose up -d
 
