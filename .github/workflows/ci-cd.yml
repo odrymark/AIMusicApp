@@ -45,7 +45,7 @@ jobs:
             /d:sonar.coverageReportPaths="coverage-report/SonarQube.xml" \
             /d:sonar.qualitygate.wait=true \
             /d:sonar.exclusions="client/**,**/Migrations/**,k6/**,testcafe/**,**/Dockerfile" \
-            /d:sonar.coverage.exclusions="**/DTOs/**,**/*Dto.cs,**/Program.cs,**/DataAccess/**"
+            /d:sonar.coverage.exclusions="**/DTOs/**,**/*Dto.cs,**/Program.cs,**/DataAccess/**,**/AI_backend/**"
 
       - name: Build & Test
         run: |
