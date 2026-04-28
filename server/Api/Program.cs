@@ -79,7 +79,9 @@ builder.Services.AddSingleton<IFeatureStateProvider>(
 
 builder.Services.AddHttpClient("AiBackend", client =>
 {
-    client.BaseAddress = new Uri("http://ai_backend:8000");
+    var url = builder.Configuration["AiBackend:BaseUrl"] 
+              ?? throw new InvalidOperationException("AiBackend:BaseUrl is not configured");
+    client.BaseAddress = new Uri(url);
     client.Timeout = TimeSpan.FromMinutes(3);
 });
 
