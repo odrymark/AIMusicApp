@@ -169,7 +169,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /var/www/app/MusicApp
+            cd /var/www/app/AIMusicApp
             cp ../.env.Staging .env
             docker-compose up -d
 
@@ -215,6 +215,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /var/www/app/MusicApp
+            cd /var/www/app/AIMusicApp
             cp ../.env.Production .env
             docker-compose up -d
