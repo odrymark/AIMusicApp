@@ -171,7 +171,7 @@ jobs:
           script: |
             cd /var/www/app/AIMusicApp
             cp ../.env.Staging .env
-            docker-compose up -d
+            docker compose up -d
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -217,4 +217,4 @@ jobs:
           script: |
             cd /var/www/app/AIMusicApp
             cp ../.env.Production .env
-            docker-compose up -d
+            docker compose up -d
