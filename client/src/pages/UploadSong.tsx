@@ -127,7 +127,7 @@ export default function UploadSong() {
                                 accept="audio/mpeg"
                                 className="file-input file-input-bordered w-full"
                                 onChange={(e) =>
-                                    setFile(e.target.files ? e.target.files[0] : null)
+                                    setFile(e.target.files?.[0] ?? null)
                                 }
                             />
                         </div>

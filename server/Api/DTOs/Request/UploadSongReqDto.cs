@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-
-namespace Api.DTOs.Request;
-
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
+
+namespace Api.DTOs.Request;
 
 public class UploadSongReqDto
 {

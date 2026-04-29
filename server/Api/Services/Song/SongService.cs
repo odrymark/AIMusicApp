@@ -6,7 +6,7 @@ namespace Api.Services.Song;
 
 public class SongService(MusicDbContext context) : ISongService
 {
-    public async Task CreateSong(Guid userId, string title, string songKey,  string artist, bool isPublic, string mood, string? imageKey = null)
+    public async Task CreateSong(Guid userId, string title, string songKey, string artist, bool isPublic, string mood, string? imageKey = null)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("Title cannot be empty", nameof(title));
@@ -39,17 +39,7 @@ public class SongService(MusicDbContext context) : ISongService
             .OrderByDescending(s => s.id)
             .ToListAsync();
 
-        var songDtos = songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist =  s.artist,
-            image = s.image,
-            isPublic = s.isPublic
-        });
-
-        return songDtos;
+        return songs.Select(MapToDto);
     }
 
     public async Task<IEnumerable<SongResDto>> GetSongs()
@@ -59,18 +49,18 @@ public class SongService(MusicDbContext context) : ISongService
             .OrderByDescending(s => s.id)
             .ToListAsync();
 
-        var songDtos = songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist = s.artist,
-            image = s.image,
-            isPublic = s.isPublic
-        });
-        
-        return songDtos;
+        return songs.Select(MapToDto);
     }
+
+    private static SongResDto MapToDto(DataAccess.Song s) => new()
+    {
+        id = s.id,
+        title = s.title,
+        songKey = s.songKey,
+        artist = s.artist,
+        image = s.image,
+        isPublic = s.isPublic
+    };
 
     public async Task EditSong(Guid userId, Guid songId, string title, string artist, bool isPublic, string? imageKey = null)
     {

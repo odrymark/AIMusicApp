@@ -1,7 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Api.DTOs.Request;
-using Api.Services;
 using Api.Services.AI;
 using Api.Services.R2;
 using Api.Services.Song;
@@ -15,6 +13,12 @@ namespace Api.Controllers;
 [Route("api/song")]
 public class SongController(IR2Service r2Service, ISongService songService, IAiService aiService, IFeatureStateProvider stateProvider) : ControllerBase
 {
+    private Guid GetCurrentUserId()
+    {
+        var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.Parse(idStr!);
+    }
+
     [Authorize]
     [HttpPost("uploadSong")]
     public async Task<IActionResult> UploadSong([FromForm] UploadSongReqDto dto)
@@ -24,8 +28,7 @@ public class SongController(IR2Service r2Service, ISongService songService, IAiS
 
         try
         {
-            var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var id = Guid.Parse(idStr!);
+            var id = GetCurrentUserId();
 
             var songKey = await r2Service.UploadSongStorage(dto.file);
         
@@ -54,8 +57,7 @@ public class SongController(IR2Service r2Service, ISongService songService, IAiS
     {
         try
         {
-            var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var id = Guid.Parse(idStr!);
+            var id = GetCurrentUserId();
             
             var songs = await songService.GetUserSongs(id);
             
@@ -108,8 +110,7 @@ public class SongController(IR2Service r2Service, ISongService songService, IAiS
         
         try
         {
-            var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var id = Guid.Parse(idStr!);
+            var id = GetCurrentUserId();
 
             string? imgKey = null;
             if (dto.image != null)
