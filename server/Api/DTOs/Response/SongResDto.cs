@@ -9,6 +9,7 @@ public class SongResDto
     public required string songKey { get; set; }
     
     public required string artist { get; set; }
+    public required string mood { get; set; }
 
     public string? image { get; set; }
     public bool isPublic { get; set; }

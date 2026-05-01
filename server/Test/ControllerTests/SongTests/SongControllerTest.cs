@@ -123,7 +123,7 @@ public class SongControllerTests(
         
         var songs = new List<SongResDto> 
         { 
-            new SongResDto { id = Guid.NewGuid(), title = "Song 1", artist = "Artist Name 1", isPublic = true, songKey = "Song Key 1"}
+            new SongResDto { id = Guid.NewGuid(), title = "Song 1", artist = "Artist Name 1", isPublic = true, songKey = "Song Key 1", mood = "happy" }
         };
         mockSongService.GetUserSongs(userId).Returns(songs);
 
@@ -151,8 +151,8 @@ public class SongControllerTests(
     {
         var songs = new List<SongResDto> 
         { 
-            new SongResDto { id = Guid.NewGuid(), title = "Public Song 1", artist = "Artist Name 1",  isPublic = true, songKey = "Song Key 1"},
-            new SongResDto { id = Guid.NewGuid(), title = "Public Song 2", artist = "Artist Name 2",  isPublic = true, songKey = "Song Key 2" }
+            new SongResDto { id = Guid.NewGuid(), title = "Public Song 1", artist = "Artist Name 1",  isPublic = true, songKey = "Song Key 1", mood = "happy" },
+            new SongResDto { id = Guid.NewGuid(), title = "Public Song 2", artist = "Artist Name 2",  isPublic = true, songKey = "Song Key 2", mood = "happy" }
         };
         mockSongService.GetSongs().Returns(songs);
 

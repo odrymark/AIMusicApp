@@ -24,6 +24,7 @@ export type Song = {
     artist: string;
     image: string | null;
     isPublic: boolean;
+    mood: string;
 }
 
 export type Playlist = {

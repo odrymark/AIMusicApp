@@ -46,7 +46,8 @@ public class SongService(MusicDbContext context) : ISongService
             songKey = s.songKey,
             artist =  s.artist,
             image = s.image,
-            isPublic = s.isPublic
+            isPublic = s.isPublic,
+            mood = s.mood
         });
 
         return songDtos;
@@ -66,7 +67,8 @@ public class SongService(MusicDbContext context) : ISongService
             songKey = s.songKey,
             artist = s.artist,
             image = s.image,
-            isPublic = s.isPublic
+            isPublic = s.isPublic,
+            mood = s.mood
         });
         
         return songDtos;
