@@ -99,7 +99,8 @@ public class PlaylistService(MusicDbContext context) : IPlaylistService
                 songKey = s.songKey,
                 artist = s.artist,
                 image = s.image,
-                isPublic = s.isPublic
+                isPublic = s.isPublic,
+                mood = s.mood
             }).ToList()
         });
     }
@@ -127,7 +128,8 @@ public class PlaylistService(MusicDbContext context) : IPlaylistService
                 songKey = s.songKey,
                 artist = s.artist,
                 image = s.image,
-                isPublic = s.isPublic
+                isPublic = s.isPublic,
+                mood = s.mood
             }).ToList()
         });
 

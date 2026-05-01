@@ -6,12 +6,13 @@ import SongSection from "../components/SongSection.tsx";
 import useMusicCrud, {type Playlist, type Song} from "../useMusicCrud.ts";
 
 export default function Home() {
-    const topTrendingRef = useRef<HTMLDivElement>(null);
     const mostListenedRef = useRef<HTMLDivElement>(null);
     const recommendationsRef = useRef<HTMLDivElement>(null);
+    const moodRef = useRef<HTMLDivElement>(null);
     const [songs, setSongs] = useState<Song[]>([]);
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedMood, setSelectedMood] = useState<string>("");
     const { getSongs, getSignedUrl, getPlaylists } = useMusicCrud();
     const setCurrentSong = useSetAtom(currentSongAtom);
     const setCurrentPlaylist = useSetAtom(currentPlaylistAtom);
@@ -62,6 +63,9 @@ export default function Home() {
     );
 
     const isSearching = searchQuery.trim().length > 0;
+
+    const availableMoods = Array.from(new Set(songs.map((s) => s.mood).filter(Boolean))).sort();
+    const moodFilteredSongs = selectedMood ? songs.filter((s) => s.mood === selectedMood) : songs;
 
     return (
         <div className="h-screen flex flex-col bg-base-200">
@@ -120,9 +124,25 @@ export default function Home() {
                             </>
                         ) : (
                             <>
-                                <SongSection ref={topTrendingRef} title="Top Trending" songs={songs} onSongClick={handleSongClick} />
                                 <SongSection ref={mostListenedRef} title="Your Most Listened" songs={songs} onSongClick={handleSongClick} />
                                 <SongSection ref={recommendationsRef} title="Recommendations For You" songs={songs} onSongClick={handleSongClick} />
+
+                                <div className="mb-12">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <h2 className="text-2xl font-semibold text-primary">Grouped by Mood</h2>
+                                        <select
+                                            value={selectedMood}
+                                            onChange={(e) => setSelectedMood(e.target.value)}
+                                            className="select select-bordered select-sm bg-base-200 focus:outline-none focus:border-primary"
+                                        >
+                                            <option value="">All Moods</option>
+                                            {availableMoods.map((mood) => (
+                                                <option key={mood} value={mood}>{mood}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <SongSection ref={moodRef} title="" songs={moodFilteredSongs} onSongClick={handleSongClick} />
+                                </div>
                             </>
                         )}
                     </div>
