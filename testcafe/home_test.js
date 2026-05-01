@@ -32,12 +32,12 @@ test('renders top playlists sidebar', async (t) => {
     await t.expect(playlistHeader.exists).ok();
 });
 test('renders song sections when not searching', async (t) => {
-    const topTrending      = Selector('div').withText('Top Trending');
     const mostListened     = Selector('div').withText('Your Most Listened');
     const recommendations  = Selector('div').withText('Recommendations For You');
-    await t.expect(topTrending.exists).ok();
+    const groupedByMood    = Selector('div').withText('Grouped by Mood');
     await t.expect(mostListened.exists).ok();
     await t.expect(recommendations.exists).ok();
+    await t.expect(groupedByMood.exists).ok();
 });
 
 // Search
@@ -60,8 +60,8 @@ test('clearing search restores song sections', async (t) => {
     await t.typeText(searchInput, 'test');
     await t.expect(searchResultText.exists).ok();
     await t.selectText(searchInput).pressKey('delete');
-    const topTrending = Selector('div').withText('Top Trending');
-    await t.expect(topTrending.exists).ok();
+    const mostListened = Selector('div').withText('Your Most Listened');
+    await t.expect(mostListened.exists).ok();
 });
 
 // Song cards
