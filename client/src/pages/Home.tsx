@@ -12,21 +12,22 @@ export default function Home() {
     const [songs, setSongs] = useState<Song[]>([]);
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedMood, setSelectedMood] = useState<string>("");
+    const [selectedMood, setSelectedMood] = useState("");
     const { getSongs, getSignedUrl, getPlaylists } = useMusicCrud();
     const setCurrentSong = useSetAtom(currentSongAtom);
     const setCurrentPlaylist = useSetAtom(currentPlaylistAtom);
 
+    async function resolveSongUrls(song: Song) {
+        return {
+            ...song,
+            songUrl: await getSignedUrl(song.songKey),
+            image: song.image ? await getSignedUrl(song.image) : null,
+        };
+    }
+
     useEffect(() => {
         getSongs().then(async (res) => {
-            const songsWithUrls = await Promise.all(
-                res.map(async (song) => ({
-                    ...song,
-                    songUrl: await getSignedUrl(song.songKey),
-                    image: song.image ? await getSignedUrl(song.image) : null,
-                }))
-            );
-            setSongs(songsWithUrls);
+            setSongs(await Promise.all(res.map(resolveSongUrls)));
         });
 
         getPlaylists().then(async (res) => {
@@ -34,13 +35,7 @@ export default function Home() {
                 res.map(async (playlist) => ({
                     ...playlist,
                     image: playlist.image ? await getSignedUrl(playlist.image) : null,
-                    songs: await Promise.all(
-                        playlist.songs.map(async (song) => ({
-                            ...song,
-                            songUrl: await getSignedUrl(song.songKey),
-                            image: song.image ? await getSignedUrl(song.image) : null,
-                        }))
-                    ),
+                    songs: await Promise.all(playlist.songs.map(resolveSongUrls)),
                 }))
             );
             setPlaylists(playlistsWithUrls);

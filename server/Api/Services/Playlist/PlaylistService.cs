@@ -92,16 +92,7 @@ public class PlaylistService(MusicDbContext context) : IPlaylistService
             creatorUser = p.user.username,
             image = p.image,
             isPublic = p.isPublic,
-            songs = p.songs.Select(s => new SongResDto
-            {
-                id = s.id,
-                title = s.title,
-                songKey = s.songKey,
-                artist = s.artist,
-                image = s.image,
-                isPublic = s.isPublic,
-                mood = s.mood
-            }).ToList()
+            songs = p.songs.Select(SongResDto.FromSong).ToList()
         });
     }
 
@@ -121,16 +112,7 @@ public class PlaylistService(MusicDbContext context) : IPlaylistService
             creatorUser = p.user.username,
             image = p.image,
             isPublic = p.isPublic,
-            songs = p.songs.Select(s => new SongResDto
-            {
-                id = s.id,
-                title = s.title,
-                songKey = s.songKey,
-                artist = s.artist,
-                image = s.image,
-                isPublic = s.isPublic,
-                mood = s.mood
-            }).ToList()
+            songs = p.songs.Select(SongResDto.FromSong).ToList()
         });
 
         return playlistDtos;

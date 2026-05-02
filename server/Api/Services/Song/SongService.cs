@@ -39,16 +39,7 @@ public class SongService(MusicDbContext context) : ISongService
             .OrderByDescending(s => s.id)
             .ToListAsync();
 
-        var songDtos = songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist =  s.artist,
-            image = s.image,
-            isPublic = s.isPublic,
-            mood = s.mood
-        });
+        var songDtos = songs.Select(SongResDto.FromSong);
 
         return songDtos;
     }
@@ -60,16 +51,7 @@ public class SongService(MusicDbContext context) : ISongService
             .OrderByDescending(s => s.id)
             .ToListAsync();
 
-        var songDtos = songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist = s.artist,
-            image = s.image,
-            isPublic = s.isPublic,
-            mood = s.mood
-        });
+        var songDtos = songs.Select(SongResDto.FromSong);
         
         return songDtos;
     }
