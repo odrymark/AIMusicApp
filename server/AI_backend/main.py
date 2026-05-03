@@ -1,10 +1,14 @@
-from fastapi import FastAPI
+import traceback
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from agents.MoodAgent import MoodAgent
-from models.SongInputModel import SongInputModel
-from models.SongOutputModel import SongOutputModel
+from agents.SongAgent import SongAgent
+from models.MoodInputModel import MoodInputModel
+from models.MoodOutputModel import MoodOutputModel
+from models.RecommendInputModel import RecommendInputModel
+from models.RecommendOutputModel import RecommendOutputModel
 
 app = FastAPI()
+agent = SongAgent()
 
 app.add_middleware(
     CORSMiddleware,
@@ -13,11 +17,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/classify", response_model=SongOutputModel)
-async def classify_mood(input: SongInputModel) -> SongOutputModel:
-    agent = MoodAgent()
-    mood = agent.run(input.lyrics, input.bpm)
-    return SongOutputModel(mood=mood)
+@app.post("/classify", response_model=MoodOutputModel)
+async def classify_mood(input: MoodInputModel) -> MoodOutputModel:
+    try:
+        mood = agent.run(f"Classify the mood of this song. lyrics={input.lyrics}, bpm={input.bpm}")
+        if not mood:
+            raise HTTPException(status_code=500, detail="Model returned empty mood")
+        return MoodOutputModel(mood=mood)
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR in classify_mood: {e}")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/recommend", response_model=RecommendOutputModel)
+async def recommend_songs(input: RecommendInputModel) -> RecommendOutputModel:
+    try:
+        raw = agent.run(f"Recommend songs. listened={input.listened_moods}, available={input.available_songs}")
+        if not raw:
+            raise HTTPException(status_code=500, detail="Model returned empty recommendations")
+        song_ids = [s.strip() for s in raw.split(",") if s.strip()]
+        if not song_ids:
+            raise HTTPException(status_code=500, detail=f"Model returned non-parseable output: {raw}")
+        return RecommendOutputModel(song_ids=song_ids)
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR in recommend_songs: {e}")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

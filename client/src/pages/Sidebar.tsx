@@ -14,7 +14,7 @@ function navButtonClass(pathname: string, targetPath: string): string {
 }
 
 export default function Sidebar() {
-    const { getMe, logout, getSignedUrl } = useMusicCrud();
+    const { getMe, logout, getSignedUrl, addUserHistory } = useMusicCrud();
     const user = useAtomValue(userAtom);
     const navigate = useNavigate();
     const location = useLocation();
@@ -40,9 +40,18 @@ export default function Sidebar() {
 
         let cancelled = false;
 
-        getSignedUrl(currentSong.songKey)
-            .then(url => { if (!cancelled) setResolvedUrl(url); })
-            .catch(() => { if (!cancelled) setResolvedUrl(null); });
+        const run = async () => {
+            try {
+                const url = await getSignedUrl(currentSong.songKey);
+                if (!cancelled) setResolvedUrl(url);
+            } catch {
+                if (!cancelled) setResolvedUrl(null);
+            }
+
+            await addUserHistory(currentSong.id);
+        };
+
+        run();
 
         return () => { cancelled = true; };
     }, [currentSong]);

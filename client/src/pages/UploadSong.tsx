@@ -41,6 +41,8 @@ export default function UploadSong() {
             setTitle("");
             setArtist("");
             setIsPublic(false);
+            setLyrics("");
+            setBpm(0);
         } catch (error) {
             alert("Upload failed.");
         } finally {
@@ -183,11 +185,15 @@ export default function UploadSong() {
 
                         <div className="card-actions justify-end mt-6">
                             <button
-                                className={`btn btn-primary ${isUploading ? "loading" : ""}`}
+                                className="btn btn-primary"
                                 onClick={handleUpload}
                                 disabled={isUploading}
                             >
-                                {isUploading ? "Uploading..." : "Upload Song"}
+                                {isUploading ? (
+                                    <span className="loading loading-spinner loading-sm text-primary" />
+                                ) : (
+                                    "Upload Song"
+                                )}
                             </button>
                         </div>
                     </div>

@@ -92,7 +92,7 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = "http://0.0.0.0:8080";
+  public baseUrl: string = "http://localhost:8080";
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
@@ -297,7 +297,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title My Title
  * @version 1.0.0
- * @baseUrl http://0.0.0.0:8080
+ * @baseUrl http://localhost:8080
  */
 export class Api<
   SecurityDataType extends unknown,
@@ -521,6 +521,36 @@ export class Api<
       this.request<Blob, any>({
         path: `/api/song/getSongs`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Song
+     * @name SongGetRecommendedSongs
+     * @request GET:/api/song/getRecommendedSongs
+     */
+    songGetRecommendedSongs: (params: RequestParams = {}) =>
+      this.request<Blob, any>({
+        path: `/api/song/getRecommendedSongs`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Song
+     * @name SongAddHistory
+     * @request POST:/api/song/addHistory
+     */
+    songAddHistory: (data: string, params: RequestParams = {}) =>
+      this.request<Blob, any>({
+        path: `/api/song/addHistory`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

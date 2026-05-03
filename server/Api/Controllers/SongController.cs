@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Api.DTOs.Request;
+using Api.DTOs.Response;
 using Api.Services;
 using Api.Services.AI;
 using Api.Services.R2;
@@ -13,7 +14,11 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/song")]
-public class SongController(IR2Service r2Service, ISongService songService, IAiService aiService, IFeatureStateProvider stateProvider) : ControllerBase
+public class SongController(
+    IR2Service r2Service,
+    ISongService songService,
+    IAiService aiService,
+    IFeatureStateProvider stateProvider) : ControllerBase
 {
     [Authorize]
     [HttpPost("uploadSong")]
@@ -28,13 +33,13 @@ public class SongController(IR2Service r2Service, ISongService songService, IAiS
             var id = Guid.Parse(idStr!);
 
             var songKey = await r2Service.UploadSongStorage(dto.file);
-        
+
             string? imgKey = null;
             if (dto.image != null)
             {
                 imgKey = await r2Service.UploadImageStorage(dto.image);
             }
-            
+
             var mood = await aiService.GetSongMood(dto.lyrics, dto.bpm);
 
             await songService.CreateSong(id, dto.title, songKey, dto.artist, dto.isPublic, mood, imgKey);
@@ -56,9 +61,9 @@ public class SongController(IR2Service r2Service, ISongService songService, IAiS
         {
             var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var id = Guid.Parse(idStr!);
-            
+
             var songs = await songService.GetUserSongs(id);
-            
+
             return Ok(songs);
         }
         catch (Exception ex)
@@ -74,6 +79,62 @@ public class SongController(IR2Service r2Service, ISongService songService, IAiS
         {
             var songs = await songService.GetSongs();
             return Ok(songs);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("getRecommendedSongs")]
+    public async Task<IActionResult> GetRecommendedSongs()
+    {
+        try
+        {
+            var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            IEnumerable<SongResDto> randomSongs;
+
+            if (Guid.TryParse(idStr, out var userId) && userId != Guid.Empty)
+            {
+                var songs = await songService.GetSongs();
+                var history = await songService.GetRecentSongs(userId);
+
+                try
+                {
+                    var recom = await aiService.GetRecommendations(history, songs);
+                    var songList = await songService.GetSongsById(recom);
+                    return Ok(songList);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"AI recommendation failed, falling back to random: {ex.Message}");
+                    randomSongs = await songService.GetRandomSongs();
+                    return Ok(randomSongs);
+                }
+            }
+
+            randomSongs = await songService.GetRandomSongs();
+            return Ok(randomSongs);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    [Authorize]
+    [HttpPost("addHistory")]
+    public async Task<IActionResult> AddHistory([FromBody] string songId)
+    {
+        try
+        {
+            var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = Guid.Parse(idStr!);
+            
+            await songService.AddHistory(userId, Guid.Parse(songId));
+            return Ok();
         }
         catch (Exception ex)
         {

@@ -82,7 +82,7 @@ builder.Services.AddHttpClient("AiBackend", client =>
     var url = builder.Configuration["AiBackend:BaseUrl"] 
               ?? throw new InvalidOperationException("AiBackend:BaseUrl is not configured");
     client.BaseAddress = new Uri(url);
-    client.Timeout = TimeSpan.FromMinutes(3);
+    client.Timeout = TimeSpan.FromMinutes(10);
 });
 
 builder.Services.AddScoped<ISeeder, Seeder>();
