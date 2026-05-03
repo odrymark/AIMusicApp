@@ -1,6 +1,6 @@
 from pydantic import BaseModel, field_validator
 
-class SongInputModel(BaseModel):
+class MoodInputModel(BaseModel):
     lyrics: str
     bpm: int
 

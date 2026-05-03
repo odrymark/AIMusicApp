@@ -155,11 +155,25 @@ export default function useMusicCrud() {
         );
     }
 
+    async function getRecommendedSongs(): Promise<Song[]> {
+        return withAuthRetry(
+            () => api.api.songGetRecommendedSongs(),
+            (res) => res.json() as Promise<Song[]>
+        );
+    }
+
     async function getSignedUrl(key: string): Promise<string> {
         return withAuthRetry(
             () => api.api.songGetSignedUrl({ key }),
             (res) => res.text()
         );
+    }
+
+    async function addUserHistory(songKey: string): Promise<void> {
+        return withAuthRetry(
+            () => api.api.songAddHistory(songKey),
+            () => Promise.resolve(undefined)
+        )
     }
 
     async function editSong(id: string, title: string, artist: string, isPublic: boolean, prevImgKey?: string, image?: File): Promise<void> {
@@ -238,6 +252,8 @@ export default function useMusicCrud() {
         getPlaylists,
         getUserPlaylists,
         editPlaylist,
-        getFunctionState
+        getFunctionState,
+        getRecommendedSongs,
+        addUserHistory
     };
 }

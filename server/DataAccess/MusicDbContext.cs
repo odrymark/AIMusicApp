@@ -39,9 +39,22 @@ public class MusicDbContext : DbContext
                     .HasForeignKey("PlaylistId")
                     .OnDelete(DeleteBehavior.Restrict)
             );
+
+        modelBuilder.Entity<History>()
+            .HasOne(h => h.user)
+            .WithMany()
+            .HasForeignKey(h => h.userId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<History>()
+            .HasOne(h => h.song)
+            .WithMany()
+            .HasForeignKey(h => h.songId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 
     public DbSet<User> Users { get; set; }
     public DbSet<Song> Songs { get; set; }
     public DbSet<Playlist> Playlists { get; set; }
+    public DbSet<History> History { get; set; }
 }

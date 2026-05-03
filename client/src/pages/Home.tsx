@@ -1,21 +1,27 @@
 import {useEffect, useRef, useState} from "react";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom} from "jotai";
 import { currentSongAtom } from "../atoms/currentSongAtom";
 import { currentPlaylistAtom } from "../atoms/currentPlaylistAtom";
 import SongSection from "../components/SongSection.tsx";
 import useMusicCrud, {type Playlist, type Song} from "../useMusicCrud.ts";
+import { userAtom } from "../atoms/userAtom.ts";
 
 export default function Home() {
     const mostListenedRef = useRef<HTMLDivElement>(null);
     const recommendationsRef = useRef<HTMLDivElement>(null);
     const moodRef = useRef<HTMLDivElement>(null);
     const [songs, setSongs] = useState<Song[]>([]);
+    const [recommendedSongs, setRecommendedSongs] = useState<Song[]>([]);
+    const [recommendationsLoading, setRecommendationsLoading] = useState(true);
+    const [songsLoading, setSongsLoading] = useState(true);
+    const [playlistsLoading, setPlaylistsLoading] = useState(true);
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedMood, setSelectedMood] = useState<string>("");
-    const { getSongs, getSignedUrl, getPlaylists } = useMusicCrud();
+    const { getSongs, getSignedUrl, getPlaylists, getRecommendedSongs } = useMusicCrud();
     const setCurrentSong = useSetAtom(currentSongAtom);
     const setCurrentPlaylist = useSetAtom(currentPlaylistAtom);
+    const user = useAtomValue(userAtom);
 
     useEffect(() => {
         getSongs().then(async (res) => {
@@ -27,7 +33,18 @@ export default function Home() {
                 }))
             );
             setSongs(songsWithUrls);
-        });
+        }).finally(() => setSongsLoading(false));
+
+        getRecommendedSongs().then(async (res) => {
+            const songsWithUrls = await Promise.all(
+                res.map(async (song) => ({
+                    ...song,
+                    songUrl: await getSignedUrl(song.songKey),
+                    image: song.image ? await getSignedUrl(song.image) : null,
+                }))
+            );
+            setRecommendedSongs(songsWithUrls);
+        }).finally(() => setRecommendationsLoading(false));
 
         getPlaylists().then(async (res) => {
             const playlistsWithUrls = await Promise.all(
@@ -44,8 +61,8 @@ export default function Home() {
                 }))
             );
             setPlaylists(playlistsWithUrls);
-        });
-    }, []);
+        }).finally(() => setPlaylistsLoading(false));
+    }, [user]);
 
     const handlePlayPlaylist = (playlist: Playlist) => {
         if (playlist.songs.length === 0) return;
@@ -124,8 +141,27 @@ export default function Home() {
                             </>
                         ) : (
                             <>
-                                <SongSection ref={mostListenedRef} title="Your Most Listened" songs={songs} onSongClick={handleSongClick} />
-                                <SongSection ref={recommendationsRef} title="Recommendations For You" songs={songs} onSongClick={handleSongClick} />
+                                {songsLoading ? (
+                                    <div className="mb-12">
+                                        <h2 className="text-2xl font-semibold text-primary mb-4">Your Most Listened</h2>
+                                        <div className="flex items-center justify-center py-10">
+                                            <span className="loading loading-spinner loading-lg text-primary" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <SongSection ref={mostListenedRef} title="Your Most Listened" songs={songs} onSongClick={handleSongClick} />
+                                )}
+
+                                {recommendationsLoading ? (
+                                    <div className="mb-12">
+                                        <h2 className="text-2xl font-semibold text-primary mb-4">Recommendations For You</h2>
+                                        <div className="flex items-center justify-center py-10">
+                                            <span className="loading loading-spinner loading-lg text-primary" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <SongSection ref={recommendationsRef} title="Recommendations For You" songs={recommendedSongs} onSongClick={handleSongClick} />
+                                )}
 
                                 <div className="mb-12">
                                     <div className="flex items-center gap-4 mb-4">
@@ -141,7 +177,13 @@ export default function Home() {
                                             ))}
                                         </select>
                                     </div>
-                                    <SongSection ref={moodRef} title="" songs={moodFilteredSongs} onSongClick={handleSongClick} />
+                                    {songsLoading ? (
+                                        <div className="flex items-center justify-center py-10">
+                                            <span className="loading loading-spinner loading-lg text-primary" />
+                                        </div>
+                                    ) : (
+                                        <SongSection ref={moodRef} title="" songs={moodFilteredSongs} onSongClick={handleSongClick} />
+                                    )}
                                 </div>
                             </>
                         )}
@@ -151,31 +193,39 @@ export default function Home() {
                 <aside className="w-72 border-l border-base-300 bg-base-100 p-6 flex-shrink-0 flex flex-col">
                     <h3 className="text-lg font-semibold mb-4 text-center text-primary">Top Playlists</h3>
                     <div className="flex-1 flex flex-col gap-3 overflow-y-auto">
-                        {playlists.length === 0 && (
-                            <p className="text-center text-base-content/40 text-sm">No playlists yet.</p>
-                        )}
-                        {playlists.map((playlist) => (
-                            <div
-                                key={playlist.id}
-                                onClick={() => handlePlayPlaylist(playlist)}
-                                className="flex items-center gap-3 cursor-pointer hover:bg-base-200 p-2 rounded group relative"
-                            >
-                                {playlist.image ? (
-                                    <img src={playlist.image} alt={playlist.title} className="w-12 h-12 rounded-md object-cover flex-shrink-0" />
-                                ) : (
-                                    <div className="w-12 h-12 rounded-md bg-base-300 flex items-center justify-center text-xl flex-shrink-0">🎶</div>
-                                )}
-                                <div className="min-w-0 flex-1">
-                                    <p className="font-medium truncate">{playlist.title}</p>
-                                    <p className="text-xs text-base-content/50 truncate">{playlist.songs.length} songs</p>
-                                </div>
-                                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-4 h-4 ml-0.5">
-                                        <path d="M8 5v14l11-7z" />
-                                    </svg>
-                                </div>
+                        {playlistsLoading ? (
+                            <div className="flex items-center justify-center py-10">
+                                <span className="loading loading-spinner loading-lg text-primary" />
                             </div>
-                        ))}
+                        ) : (
+                            <>
+                                {playlists.length === 0 && (
+                                    <p className="text-center text-base-content/40 text-sm">No playlists yet.</p>
+                                )}
+                                {playlists.map((playlist) => (
+                                    <div
+                                        key={playlist.id}
+                                        onClick={() => handlePlayPlaylist(playlist)}
+                                        className="flex items-center gap-3 cursor-pointer hover:bg-base-200 p-2 rounded group relative"
+                                    >
+                                        {playlist.image ? (
+                                            <img src={playlist.image} alt={playlist.title} className="w-12 h-12 rounded-md object-cover flex-shrink-0" />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-md bg-base-300 flex items-center justify-center text-xl flex-shrink-0">🎶</div>
+                                        )}
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium truncate">{playlist.title}</p>
+                                            <p className="text-xs text-base-content/50 truncate">{playlist.songs.length} songs</p>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-4 h-4 ml-0.5">
+                                                <path d="M8 5v14l11-7z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                     </div>
                 </aside>
             </div>
