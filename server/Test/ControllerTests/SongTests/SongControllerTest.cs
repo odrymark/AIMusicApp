@@ -52,7 +52,7 @@ public class SongControllerTests(
         Assert.IsType<OkResult>(result);
         await mockR2Service.Received(1).UploadSongStorage(mockSongFile);
         await mockR2Service.Received(1).UploadImageStorage(mockImgFile);
-        await mockSongService.Received(1).CreateSong(userId, dto.title, "song-key-123", dto.artist, dto.isPublic, "happy","img-key-456");
+        await mockSongService.Received(1).CreateSong(userId, dto.title, "song-key-123", dto.artist, dto.isPublic, "happy", "img-key-456");
     }
 
     [Fact]
@@ -79,7 +79,6 @@ public class SongControllerTests(
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-789");
         mockAiService.GetSongMood(dto.lyrics, dto.bpm).Returns("happy");
-
 
         var result = await _controller.UploadSong(dto);
 
@@ -123,7 +122,7 @@ public class SongControllerTests(
         
         var songs = new List<SongResDto> 
         { 
-            new SongResDto { id = Guid.NewGuid(), title = "Song 1", artist = "Artist Name 1", isPublic = true, songKey = "Song Key 1", mood = "happy" }
+            new() { id = Guid.NewGuid(), title = "Song 1", artist = "Artist Name 1", isPublic = true, songKey = "Song Key 1", mood = "happy" }
         };
         mockSongService.GetUserSongs(userId).Returns(songs);
 
@@ -151,8 +150,8 @@ public class SongControllerTests(
     {
         var songs = new List<SongResDto> 
         { 
-            new SongResDto { id = Guid.NewGuid(), title = "Public Song 1", artist = "Artist Name 1",  isPublic = true, songKey = "Song Key 1", mood = "happy" },
-            new SongResDto { id = Guid.NewGuid(), title = "Public Song 2", artist = "Artist Name 2",  isPublic = true, songKey = "Song Key 2", mood = "happy" }
+            new() { id = Guid.NewGuid(), title = "Public Song 1", artist = "Artist Name 1", isPublic = true, songKey = "Song Key 1", mood = "happy" },
+            new() { id = Guid.NewGuid(), title = "Public Song 2", artist = "Artist Name 2", isPublic = true, songKey = "Song Key 2", mood = "happy" }
         };
         mockSongService.GetSongs().Returns(songs);
 
@@ -172,14 +171,112 @@ public class SongControllerTests(
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
+    // -------------------------
+    // GetRecommendedSongs Tests
+    // -------------------------
+
+    [Fact]
+    public async Task GetRecommendedSongs_Returns_Recommended_Songs_For_Logged_In_User()
+    {
+        var userId = Guid.NewGuid();
+        SongControllerStartup.SetupUserClaims(_controller, userId);
+
+        var songs = new List<SongResDto> { new() { id = Guid.NewGuid(), title = "Song 1", mood = "happy", songKey = "key", artist = "artist", isPublic = true } };
+        var history = new List<SongResDto> { new() { id = Guid.NewGuid(), title = "History Song", mood = "happy", songKey = "key", artist = "artist", isPublic = true } };
+        var recommendedIds = new List<Guid> { songs[0].id };
+        var recommendedSongs = new List<SongResDto> { songs[0] };
+
+        mockSongService.GetSongs().Returns(songs);
+        mockSongService.GetRecentSongs(userId).Returns(history);
+        mockAiService.GetRecommendations(history, songs).Returns(recommendedIds);
+        mockSongService.GetSongsById(recommendedIds).Returns(recommendedSongs);
+
+        var result = await _controller.GetRecommendedSongs();
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(recommendedSongs, okResult.Value);
+    }
+
+    [Fact]
+    public async Task GetRecommendedSongs_Falls_Back_To_Random_When_AI_Fails()
+    {
+        var userId = Guid.NewGuid();
+        SongControllerStartup.SetupUserClaims(_controller, userId);
+
+        var songs = new List<SongResDto> { new() { id = Guid.NewGuid(), title = "Song 1", mood = "happy", songKey = "key", artist = "artist", isPublic = true } };
+        var history = new List<SongResDto>();
+        var randomSongs = new List<SongResDto> { new() { id = Guid.NewGuid(), title = "Random Song", mood = "happy", songKey = "key", artist = "artist", isPublic = true } };
+
+        mockSongService.GetSongs().Returns(songs);
+        mockSongService.GetRecentSongs(userId).Returns(history);
+        mockAiService.GetRecommendations(Arg.Any<IEnumerable<SongResDto>>(), Arg.Any<IEnumerable<SongResDto>>())
+            .ThrowsAsync(new Exception("AI failed"));
+        mockSongService.GetRandomSongs().Returns(randomSongs);
+
+        var result = await _controller.GetRecommendedSongs();
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(randomSongs, okResult.Value);
+    }
+
+    [Fact]
+    public async Task GetRecommendedSongs_Returns_Random_Songs_When_Not_Logged_In()
+    {
+        _controller.ControllerContext.HttpContext.User = new System.Security.Claims.ClaimsPrincipal();
+
+        var randomSongs = new List<SongResDto> { new() { id = Guid.NewGuid(), title = "Random Song", mood = "happy", songKey = "key", artist = "artist", isPublic = true } };
+        mockSongService.GetRandomSongs().Returns(randomSongs);
+
+        var result = await _controller.GetRecommendedSongs();
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(randomSongs, okResult.Value);
+    }
+
+    // -------------------------
+    // AddHistory Tests
+    // -------------------------
+
+    [Fact]
+    public async Task AddHistory_Returns_Ok_When_Successful()
+    {
+        var userId = Guid.NewGuid();
+        var songId = Guid.NewGuid();
+        SongControllerStartup.SetupUserClaims(_controller, userId);
+
+        mockSongService.AddHistory(userId, songId).Returns(Task.CompletedTask);
+
+        var result = await _controller.AddHistory(songId.ToString());
+
+        Assert.IsType<OkResult>(result);
+        await mockSongService.Received(1).AddHistory(userId, songId);
+    }
+
+    [Fact]
+    public async Task AddHistory_Returns_BadRequest_On_Exception()
+    {
+        var userId = Guid.NewGuid();
+        SongControllerStartup.SetupUserClaims(_controller, userId);
+
+        mockSongService.AddHistory(Arg.Any<Guid>(), Arg.Any<Guid>())
+            .ThrowsAsync(new Exception("DB Error"));
+
+        var result = await _controller.AddHistory(Guid.NewGuid().ToString());
+
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+    // -------------------------
+    // GetSignedUrl Tests
+    // -------------------------
+
     [Fact]
     public void GetSignedUrl_Returns_Ok_With_Url()
     {
         mockR2Service.ClearReceivedCalls();
         mockR2Service.GenerateSignedUrl(Arg.Any<string>()).Returns("https://signed-url.com");
 
-        var key = "some-file-key";
-        var result = _controller.GetSignedUrl(key);
+        var result = _controller.GetSignedUrl("some-file-key");
         
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal("https://signed-url.com", okResult.Value);
@@ -194,6 +291,10 @@ public class SongControllerTests(
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
+
+    // -------------------------
+    // EditSong Tests
+    // -------------------------
 
     [Fact]
     public async Task EditSong_Returns_Forbidden_When_Feature_Disabled()
@@ -277,7 +378,6 @@ public class SongControllerTests(
         };
 
         mockR2Service.UploadImageStorage(mockImgFile).Returns("new-image-key");
-        
         mockSongService.EditSong(userId, songId, dto.title, dto.artist, dto.isPublic, "new-image-key")
             .Returns(Task.CompletedTask);
 
