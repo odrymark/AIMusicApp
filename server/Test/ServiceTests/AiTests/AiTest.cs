@@ -9,7 +9,7 @@ namespace Test.ServiceTests.AiTests;
 
 public class AiServiceTests
 {
-    private AiService CreateService(HttpResponseMessage response)
+    private static AiService CreateService(HttpResponseMessage response)
     {
         var handler = new MockHttpMessageHandler(response);
         var httpClient = new HttpClient(handler) { BaseAddress = new Uri("http://ai_backend:8000") };
@@ -18,7 +18,7 @@ public class AiServiceTests
         return new AiService(factory);
     }
 
-    private HttpResponseMessage JsonResponse(object body, HttpStatusCode status = HttpStatusCode.OK)
+    private static HttpResponseMessage JsonResponse(object body, HttpStatusCode status = HttpStatusCode.OK)
     {
         var json = JsonSerializer.Serialize(body);
         return new HttpResponseMessage(status)
@@ -27,7 +27,7 @@ public class AiServiceTests
         };
     }
 
-    private SongResDto MakeSong(string mood = "happy") => new()
+    private static SongResDto MakeSong(string mood = "happy") => new()
     {
         id = Guid.NewGuid(),
         title = "Test Song",
@@ -155,7 +155,7 @@ public class AiServiceTests
             new[] { MakeSong("energetic") }
         );
 
-        var body = await handler.LastRequest!.Content!.ReadAsStringAsync();
+        var body = await handler.LastRequest!.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.Contains("happy", body);
         Assert.Contains("sad", body);
     }
