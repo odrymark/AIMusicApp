@@ -23,41 +23,27 @@ export default function Home() {
     const setCurrentPlaylist = useSetAtom(currentPlaylistAtom);
     const user = useAtomValue(userAtom);
 
-    useEffect(() => {
-        getSongs().then(async (res) => {
-            const songsWithUrls = await Promise.all(
-                res.map(async (song) => ({
-                    ...song,
-                    songUrl: await getSignedUrl(song.songKey),
-                    image: song.image ? await getSignedUrl(song.image) : null,
-                }))
-            );
-            setSongs(songsWithUrls);
-        }).finally(() => setSongsLoading(false));
+    async function enrichSongsWithUrls(songList: Song[]): Promise<Song[]> {
+        return Promise.all(
+            songList.map(async (song) => ({
+                ...song,
+                songUrl: await getSignedUrl(song.songKey),
+                image: song.image ? await getSignedUrl(song.image) : null,
+            }))
+        );
+    }
 
-        getRecommendedSongs().then(async (res) => {
-            const songsWithUrls = await Promise.all(
-                res.map(async (song) => ({
-                    ...song,
-                    songUrl: await getSignedUrl(song.songKey),
-                    image: song.image ? await getSignedUrl(song.image) : null,
-                }))
-            );
-            setRecommendedSongs(songsWithUrls);
-        }).finally(() => setRecommendationsLoading(false));
+    useEffect(() => {
+        getSongs().then(enrichSongsWithUrls).then(setSongs).finally(() => setSongsLoading(false));
+
+        getRecommendedSongs().then(enrichSongsWithUrls).then(setRecommendedSongs).finally(() => setRecommendationsLoading(false));
 
         getPlaylists().then(async (res) => {
             const playlistsWithUrls = await Promise.all(
                 res.map(async (playlist) => ({
                     ...playlist,
                     image: playlist.image ? await getSignedUrl(playlist.image) : null,
-                    songs: await Promise.all(
-                        playlist.songs.map(async (song) => ({
-                            ...song,
-                            songUrl: await getSignedUrl(song.songKey),
-                            image: song.image ? await getSignedUrl(song.image) : null,
-                        }))
-                    ),
+                    songs: await enrichSongsWithUrls(playlist.songs),
                 }))
             );
             setPlaylists(playlistsWithUrls);

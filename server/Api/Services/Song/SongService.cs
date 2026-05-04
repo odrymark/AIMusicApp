@@ -39,18 +39,7 @@ public class SongService(MusicDbContext context) : ISongService
             .OrderByDescending(s => s.id)
             .ToListAsync();
 
-        var songDtos = songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist =  s.artist,
-            image = s.image,
-            isPublic = s.isPublic,
-            mood = s.mood
-        });
-
-        return songDtos;
+        return songs.Select(ToSongResDto);
     }
 
     public async Task<IEnumerable<SongResDto>> GetSongs()
@@ -60,58 +49,29 @@ public class SongService(MusicDbContext context) : ISongService
             .OrderByDescending(s => s.id)
             .ToListAsync();
 
-        var songDtos = songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist = s.artist,
-            image = s.image,
-            isPublic = s.isPublic,
-            mood = s.mood
-        });
-        
-        return songDtos;
+        return songs.Select(ToSongResDto);
     }
-    
+
     public async Task<IEnumerable<SongResDto>> GetSongsById(IEnumerable<Guid> songIds)
     {
         var songs = await context.Songs
             .Where(s => songIds.Contains(s.id))
             .ToListAsync();
 
-        return songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist = s.artist,
-            image = s.image,
-            isPublic = s.isPublic,
-            mood = s.mood
-        });
+        return songs.Select(ToSongResDto);
     }
 
     public async Task<IEnumerable<SongResDto>> GetRecentSongs(Guid userId)
     {
-        var songs = await context.History
+        var history = await context.History
             .Where(h => h.userId == userId)
             .Include(h => h.song)
             .OrderByDescending(h => h.playedAt)
             .ToListAsync();
-        
-        return songs.Select(h => new SongResDto
-        {
-            id = h.id,
-            title = h.song.title,
-            songKey = h.song.songKey,
-            artist = h.song.artist,
-            image = h.song.image,
-            isPublic = h.song.isPublic,
-            mood = h.song.mood
-        });
+
+        return history.Select(h => ToSongResDto(h.song));
     }
-    
+
     public async Task<IEnumerable<SongResDto>> GetRandomSongs(int count = 10)
     {
         var songs = await context.Songs
@@ -119,17 +79,19 @@ public class SongService(MusicDbContext context) : ISongService
             .Take(count)
             .ToListAsync();
 
-        return songs.Select(s => new SongResDto
-        {
-            id = s.id,
-            title = s.title,
-            songKey = s.songKey,
-            artist = s.artist,
-            image = s.image,
-            isPublic = s.isPublic,
-            mood = s.mood
-        });
+        return songs.Select(ToSongResDto);
     }
+
+    private static SongResDto ToSongResDto(DataAccess.Song s) => new()
+    {
+        id = s.id,
+        title = s.title,
+        songKey = s.songKey,
+        artist = s.artist,
+        image = s.image,
+        isPublic = s.isPublic,
+        mood = s.mood
+    };
 
     public async Task AddHistory(Guid userId, Guid songId)
     {
