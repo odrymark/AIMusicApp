@@ -125,13 +125,12 @@ export default function useMusicCrud() {
         }
     }
 
-    async function uploadSong(file: File, title: string, artist: string, isPublic: boolean, lyrics: string, bpm: number, image?: File): Promise<void> {
+    async function uploadSong(file: File, title: string, artist: string, isPublic: boolean, bpm: number, image?: File): Promise<void> {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("title", title);
         formData.append("artist", artist);
         formData.append("isPublic", String(isPublic));
-        formData.append("lyrics", lyrics);
         formData.append("bpm", String(bpm));
         if (image) formData.append("image", image);
 

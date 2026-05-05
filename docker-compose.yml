@@ -17,6 +17,7 @@ services:
       - R2__Endpoint=${R2__ENDPOINT}
       - FeatureHub__Url=${FEATUREHUB__URL}
       - FeatureHub__SdkKey=${FEATUREHUB__SDKKEY}
+      - Genius__APIKey=${GENIUS__APIKEY}
     restart: always
     networks:
       - app-network

@@ -21,9 +21,6 @@ public class UploadSongReqDto
     public required string artist { get; set; } = string.Empty;
     
     [Required]
-    public required string lyrics { get; set; }
-    
-    [Required]
     public required int bpm { get; set; }
     
     [Required]
