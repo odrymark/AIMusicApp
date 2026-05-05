@@ -19,6 +19,7 @@ public class SongControllerStartup
         services.AddSingleton(Substitute.For<IR2Service>());
         services.AddSingleton(Substitute.For<IFeatureStateProvider>());
         services.AddSingleton(Substitute.For<IAiService>());
+        services.AddSingleton(Substitute.For<ISongMetadataService>());
         services.AddTransient<SongController>();
         services.AddSingleton(this);
     }

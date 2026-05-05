@@ -19,6 +19,7 @@ public class SongControllerTests(
     IR2Service mockR2Service,
     IFeatureStateProvider mockStateProvider,
     IAiService mockAiService,
+    ISongMetadataService mockMetadataService,
     IServiceProvider provider)
 {
     private readonly SongController _controller = SongControllerStartup.GetController(provider);
@@ -31,12 +32,12 @@ public class SongControllerTests(
 
         var mockSongFile = Substitute.For<IFormFile>();
         var mockImgFile = Substitute.For<IFormFile>();
-        
-        var dto = new UploadSongReqDto 
-        { 
-            title = "New Track", 
-            file = mockSongFile, 
-            image = mockImgFile, 
+
+        var dto = new UploadSongReqDto
+        {
+            title = "New Track",
+            file = mockSongFile,
+            image = mockImgFile,
             artist = "AI Artist",
             isPublic = true,
             bpm = 123,
@@ -44,7 +45,8 @@ public class SongControllerTests(
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-123");
         mockR2Service.UploadImageStorage(mockImgFile).Returns("img-key-456");
-        mockAiService.GetSongMood("", dto.bpm).Returns("happy");
+        mockMetadataService.GetMetadataAsync(dto.title, dto.artist).Returns("some lyrics");
+        mockAiService.GetSongMood("some lyrics", dto.bpm).Returns("happy");
 
         var result = await _controller.UploadSong(dto);
 
@@ -59,16 +61,16 @@ public class SongControllerTests(
     {
         mockSongService.ClearReceivedCalls();
         mockR2Service.ClearReceivedCalls();
-    
+
         var userId = Guid.NewGuid();
         SongControllerStartup.SetupUserClaims(_controller, userId);
 
         var mockSongFile = Substitute.For<IFormFile>();
-    
-        var dto = new UploadSongReqDto 
-        { 
-            title = "Track Without Image", 
-            file = mockSongFile, 
+
+        var dto = new UploadSongReqDto
+        {
+            title = "Track Without Image",
+            file = mockSongFile,
             image = null,
             artist = "Artist Name",
             isPublic = false,
@@ -76,7 +78,8 @@ public class SongControllerTests(
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-789");
-        mockAiService.GetSongMood("", dto.bpm).Returns("happy");
+        mockMetadataService.GetMetadataAsync(dto.title, dto.artist).Returns("some lyrics");
+        mockAiService.GetSongMood("some lyrics", dto.bpm).Returns("happy");
 
         var result = await _controller.UploadSong(dto);
 
@@ -93,11 +96,11 @@ public class SongControllerTests(
         SongControllerStartup.SetupUserClaims(_controller, userId);
 
         var mockSongFile = Substitute.For<IFormFile>();
-        
-        var dto = new UploadSongReqDto 
-        { 
-            title = "Error Track", 
-            file = mockSongFile, 
+
+        var dto = new UploadSongReqDto
+        {
+            title = "Error Track",
+            file = mockSongFile,
             image = null,
             artist = "Artist",
             isPublic = true,
@@ -116,9 +119,9 @@ public class SongControllerTests(
     {
         var userId = Guid.NewGuid();
         SongControllerStartup.SetupUserClaims(_controller, userId);
-        
-        var songs = new List<SongResDto> 
-        { 
+
+        var songs = new List<SongResDto>
+        {
             new() { id = Guid.NewGuid(), title = "Song 1", artist = "Artist Name 1", isPublic = true, songKey = "Song Key 1", mood = "happy" }
         };
         mockSongService.GetUserSongs(userId).Returns(songs);
@@ -145,8 +148,8 @@ public class SongControllerTests(
     [Fact]
     public async Task GetSongs_Returns_All_Songs()
     {
-        var songs = new List<SongResDto> 
-        { 
+        var songs = new List<SongResDto>
+        {
             new() { id = Guid.NewGuid(), title = "Public Song 1", artist = "Artist Name 1", isPublic = true, songKey = "Song Key 1", mood = "happy" },
             new() { id = Guid.NewGuid(), title = "Public Song 2", artist = "Artist Name 2", isPublic = true, songKey = "Song Key 2", mood = "happy" }
         };
@@ -167,10 +170,6 @@ public class SongControllerTests(
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
-
-    // -------------------------
-    // GetRecommendedSongs Tests
-    // -------------------------
 
     [Fact]
     public async Task GetRecommendedSongs_Returns_Recommended_Songs_For_Logged_In_User()
@@ -230,10 +229,6 @@ public class SongControllerTests(
         Assert.Equal(randomSongs, okResult.Value);
     }
 
-    // -------------------------
-    // AddHistory Tests
-    // -------------------------
-
     [Fact]
     public async Task AddHistory_Returns_Ok_When_Successful()
     {
@@ -263,10 +258,6 @@ public class SongControllerTests(
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
-    // -------------------------
-    // GetSignedUrl Tests
-    // -------------------------
-
     [Fact]
     public void GetSignedUrl_Returns_Ok_With_Url()
     {
@@ -274,7 +265,7 @@ public class SongControllerTests(
         mockR2Service.GenerateSignedUrl(Arg.Any<string>()).Returns("https://signed-url.com");
 
         var result = _controller.GetSignedUrl("some-file-key");
-        
+
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal("https://signed-url.com", okResult.Value);
     }
@@ -289,10 +280,6 @@ public class SongControllerTests(
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
-    // -------------------------
-    // EditSong Tests
-    // -------------------------
-
     [Fact]
     public async Task EditSong_Returns_Forbidden_When_Feature_Disabled()
     {
@@ -301,8 +288,8 @@ public class SongControllerTests(
 
         mockStateProvider.IsEnabled("edit_song").Returns(false);
 
-        var dto = new SongEditReqDto 
-        { 
+        var dto = new SongEditReqDto
+        {
             id = Guid.NewGuid(),
             title = "Updated Title",
             image = null,
@@ -330,8 +317,8 @@ public class SongControllerTests(
 
         mockStateProvider.IsEnabled("edit_song").Returns(true);
 
-        var dto = new SongEditReqDto 
-        { 
+        var dto = new SongEditReqDto
+        {
             id = songId,
             title = "Updated Title",
             image = null,
@@ -364,8 +351,8 @@ public class SongControllerTests(
         mockStateProvider.IsEnabled("edit_song").Returns(true);
 
         var mockImgFile = Substitute.For<IFormFile>();
-        var dto = new SongEditReqDto 
-        { 
+        var dto = new SongEditReqDto
+        {
             id = songId,
             title = "Updated Title",
             image = mockImgFile,
@@ -394,8 +381,8 @@ public class SongControllerTests(
 
         mockStateProvider.IsEnabled("edit_song").Returns(true);
 
-        var dto = new SongEditReqDto 
-        { 
+        var dto = new SongEditReqDto
+        {
             id = Guid.NewGuid(),
             title = "Updated Title",
             image = null,
