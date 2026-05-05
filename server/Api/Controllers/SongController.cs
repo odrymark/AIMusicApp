@@ -18,15 +18,13 @@ public class SongController(
     IR2Service r2Service,
     ISongService songService,
     IAiService aiService,
-    IFeatureStateProvider stateProvider) : ControllerBase
+    IFeatureStateProvider stateProvider,
+    ISongMetadataService metadataService) : ControllerBase
 {
     [Authorize]
     [HttpPost("uploadSong")]
     public async Task<IActionResult> UploadSong([FromForm] UploadSongReqDto dto)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         try
         {
             var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -39,8 +37,10 @@ public class SongController(
             {
                 imgKey = await r2Service.UploadImageStorage(dto.image);
             }
-
-            var mood = await aiService.GetSongMood(dto.lyrics, dto.bpm);
+            
+            var lyrics = await metadataService.GetMetadataAsync(dto.title, dto.artist);
+            
+            var mood = await aiService.GetSongMood(lyrics, dto.bpm);
 
             await songService.CreateSong(id, dto.title, songKey, dto.artist, dto.isPublic, mood, imgKey);
 

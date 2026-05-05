@@ -11,6 +11,7 @@ using Api.Services.Song;
 using Api.Services.Token;
 using Api.Services.User;
 using FHHelper;
+using GeniusLyrics.NET;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
@@ -94,6 +95,8 @@ builder.Services.AddScoped<IR2Service, R2Service>();
 builder.Services.AddScoped<ISongService, SongService>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IAiService, AiService>();
+builder.Services.AddSingleton(new GeniusClient(builder.Configuration["Genius:APIKey"]!));
+builder.Services.AddScoped<ISongMetadataService, SongMetadataService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApiDocument();
 

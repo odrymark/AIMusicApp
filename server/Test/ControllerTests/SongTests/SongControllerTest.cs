@@ -39,13 +39,12 @@ public class SongControllerTests(
             image = mockImgFile, 
             artist = "AI Artist",
             isPublic = true,
-            lyrics = "Lyrics",
             bpm = 123,
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-123");
         mockR2Service.UploadImageStorage(mockImgFile).Returns("img-key-456");
-        mockAiService.GetSongMood(dto.lyrics, dto.bpm).Returns("happy");
+        mockAiService.GetSongMood("", dto.bpm).Returns("happy");
 
         var result = await _controller.UploadSong(dto);
 
@@ -73,12 +72,11 @@ public class SongControllerTests(
             image = null,
             artist = "Artist Name",
             isPublic = false,
-            lyrics = "Lyrics",
             bpm = 123
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-789");
-        mockAiService.GetSongMood(dto.lyrics, dto.bpm).Returns("happy");
+        mockAiService.GetSongMood("", dto.bpm).Returns("happy");
 
         var result = await _controller.UploadSong(dto);
 
@@ -103,7 +101,6 @@ public class SongControllerTests(
             image = null,
             artist = "Artist",
             isPublic = true,
-            lyrics = "Lyrics",
             bpm = 123
         };
 
