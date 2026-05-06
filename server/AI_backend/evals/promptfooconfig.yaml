@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: "SongAgent eval — mood classifier & recommendation tool"
+
+prompts:
+  - "{{prompt}}"
+
+providers:
+  - file://provider.py
+
+tests:
+  # --- Mood classifier -------------------------------------------------------
+  - vars:
+      prompt: "Classify the mood of this song. lyrics=We're gonna have a good time, dancing all night long! The music's loud, the crowd is wild, everybody's smiling, feeling free. Sun is shining, hands in the air, not a single worry or care., bpm=128"
+    assert:
+      - type: icontains
+        value: "happy"
+      - type: javascript
+        value: "output.trim().split(/\\s+/).length <= 2 ? 1 : 0"
+
+  - vars:
+      prompt: "Classify the mood of this song. lyrics=I miss you every day, the rain keeps falling down. Your empty chair, your faded photo, nothing feels the same. I walk the streets we used to share, calling out your name. The silence is the loudest thing I've ever known., bpm=60"
+    assert:
+      - type: icontains
+        value: "sad"
+      - type: javascript
+        value: "output.length < 50 ? 1 : 0"
+
+  - vars:
+      prompt: "Classify the mood of this song. lyrics=Fight back, stand tall, never gonna fall! They pushed me down but I rose again, fists clenched and eyes burning red. Fed up with the lies, done playing dead, screaming at the walls til my throat bleeds., bpm=170"
+    assert:
+      - type: icontains
+        value: "angry"
+      - type: llm-rubric
+        value: "ensure the output is a single mood word with no extra explanation or commentary"
+        provider: "ollama:chat:song-model"
+
+  # --- Recommendation tool ---------------------------------------------------
+  - vars:
+      prompt: 'Recommend songs. listened=["happy", "energetic"], available=[{"id": "abc123", "mood": "happy"}, {"id": "def456", "mood": "energetic"}, {"id": "ghi789", "mood": "sad"}]'
+    assert:
+      - type: icontains
+        value: "abc123"
+      - type: javascript
+        value: "/^[a-zA-Z0-9]+(,[a-zA-Z0-9]+)*$/.test(output.trim()) ? 1 : 0"
+
+  - vars:
+      prompt: 'Recommend songs. listened=["sad"], available=[{"id": "id001", "mood": "sad"}, {"id": "id002", "mood": "happy"}]'
+    assert:
+      - type: icontains
+        value: "id001"
+      - type: javascript
+        value: "1 / (output.length + 1)"
+      - type: llm-rubric
+        value: "ensure the output contains only song IDs separated by commas, no extra text"
+        provider: "ollama:chat:song-model"
