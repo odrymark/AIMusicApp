@@ -8,7 +8,7 @@ from agents.SongAgent import SongAgent
 agent = SongAgent()
 
 
-def call_api(prompt: str, options: dict, context: dict) -> dict:
+def call_api(prompt: str, _options: dict, _context: dict) -> dict:
     """
     Promptfoo custom Python provider.
     The rendered prompt string is passed directly to SongAgent.run().
