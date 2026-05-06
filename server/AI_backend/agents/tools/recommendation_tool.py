@@ -2,7 +2,7 @@ from langchain_core.tools import tool
 from typing import List
 import ollama
 
-client = ollama.Client(host="http://localhost:11434")
+client = ollama.Client(host="http://ollama:11434")
 
 @tool
 def recommendation_tool(listened_moods: List[str], available_songs: List[dict]) -> str:

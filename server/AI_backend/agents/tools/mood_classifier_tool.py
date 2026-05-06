@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 import ollama
 
-client = ollama.Client(host="http://localhost:11434")
+client = ollama.Client(host="http://ollama:11434")
 
 @tool
 def mood_classifier_tool(lyrics: str, bpm: int) -> str:

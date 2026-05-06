@@ -7,7 +7,7 @@ from agents.tools.recommendation_tool import recommendation_tool
 
 class SongAgent:
     def __init__(self):
-        llm = ChatOllama(model="song-model", base_url="http://localhost:11434")
+        llm = ChatOllama(model="song-model", base_url="http://ollama:11434")
         tools = [mood_classifier_tool, recommendation_tool]
         prompt = ChatPromptTemplate.from_messages([
             ("system", (
