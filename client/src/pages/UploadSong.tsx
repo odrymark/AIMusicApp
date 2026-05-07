@@ -11,7 +11,6 @@ export default function UploadSong() {
     const [artist, setArtist] = useState("");
     const [isPublic, setIsPublic] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [bpm, setBpm] = useState<number>(0);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0] ?? null;
@@ -31,7 +30,7 @@ export default function UploadSong() {
 
         try {
             setIsUploading(true);
-            await uploadSong(file, title, artist, isPublic, bpm, image ?? undefined);
+            await uploadSong(file, title, artist, isPublic, image ?? undefined);
             alert("Song uploaded successfully!");
             setFile(null);
             setImage(null);
@@ -39,7 +38,6 @@ export default function UploadSong() {
             setTitle("");
             setArtist("");
             setIsPublic(false);
-            setBpm(0);
         } catch (error) {
             alert("Upload failed.");
         } finally {
@@ -89,19 +87,6 @@ export default function UploadSong() {
                                 className="input input-bordered w-full"
                                 value={artist}
                                 onChange={(e) => setArtist(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="form-control w-full mt-4">
-                            <label className="label">
-                                <span className="label-text">BPM</span>
-                            </label>
-                            <input
-                                type="number"
-                                placeholder="Enter BPM"
-                                className="input input-bordered w-full"
-                                value={bpm}
-                                onChange={(e) => setBpm(Number(e.target.value))}
                             />
                         </div>
 

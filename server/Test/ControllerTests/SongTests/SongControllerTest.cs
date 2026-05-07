@@ -40,13 +40,14 @@ public class SongControllerTests(
             image = mockImgFile,
             artist = "AI Artist",
             isPublic = true,
-            bpm = 123,
         };
 
+        mockSongFile.OpenReadStream().Returns(Stream.Null);
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-123");
         mockR2Service.UploadImageStorage(mockImgFile).Returns("img-key-456");
-        mockMetadataService.GetMetadataAsync(dto.title, dto.artist).Returns("some lyrics");
-        mockAiService.GetSongMood("some lyrics", dto.bpm).Returns("happy");
+        mockMetadataService.GetLyrics(dto.title, dto.artist).Returns("some lyrics");
+        mockMetadataService.GetBpm(Arg.Any<Stream>()).Returns(120);
+        mockAiService.GetSongMood("some lyrics", 120).Returns("happy");
 
         var result = await _controller.UploadSong(dto);
 
@@ -74,12 +75,13 @@ public class SongControllerTests(
             image = null,
             artist = "Artist Name",
             isPublic = false,
-            bpm = 123
         };
 
+        mockSongFile.OpenReadStream().Returns(Stream.Null);
         mockR2Service.UploadSongStorage(mockSongFile).Returns("song-key-789");
-        mockMetadataService.GetMetadataAsync(dto.title, dto.artist).Returns("some lyrics");
-        mockAiService.GetSongMood("some lyrics", dto.bpm).Returns("happy");
+        mockMetadataService.GetLyrics(dto.title, dto.artist).Returns("some lyrics");
+        mockMetadataService.GetBpm(Arg.Any<Stream>()).Returns(120);
+        mockAiService.GetSongMood("some lyrics", 120).Returns("happy");
 
         var result = await _controller.UploadSong(dto);
 
@@ -104,7 +106,6 @@ public class SongControllerTests(
             image = null,
             artist = "Artist",
             isPublic = true,
-            bpm = 123
         };
 
         mockR2Service.UploadSongStorage(mockSongFile).ThrowsAsync(new Exception("Upload failed"));
