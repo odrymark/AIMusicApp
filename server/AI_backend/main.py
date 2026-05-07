@@ -1,5 +1,7 @@
 import traceback
-from fastapi import FastAPI, HTTPException
+
+import librosa
+from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from agents.SongAgent import SongAgent
 from models.MoodInputModel import MoodInputModel
@@ -47,6 +49,12 @@ async def recommend_songs(input: RecommendInputModel) -> RecommendOutputModel:
         print(f"ERROR in recommend_songs: {e}")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/bpm")
+async def get_bpm(file: UploadFile):
+    audio, sr = librosa.load(file.file)
+    tempo, _ = librosa.beat.beat_track(y=audio, sr=sr)
+    return {"bpm": round(float(tempo.item()))}
 
 if __name__ == "__main__":
     import uvicorn

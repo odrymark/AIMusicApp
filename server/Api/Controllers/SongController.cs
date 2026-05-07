@@ -38,9 +38,11 @@ public class SongController(
                 imgKey = await r2Service.UploadImageStorage(dto.image);
             }
             
-            var lyrics = await metadataService.GetMetadataAsync(dto.title, dto.artist);
+            var lyrics = await metadataService.GetLyrics(dto.title, dto.artist);
             
-            var mood = await aiService.GetSongMood(lyrics, dto.bpm);
+            var bpm = await metadataService.GetBpm(dto.file.OpenReadStream());
+            
+            var mood = await aiService.GetSongMood(lyrics, bpm);
 
             await songService.CreateSong(id, dto.title, songKey, dto.artist, dto.isPublic, mood, imgKey);
 

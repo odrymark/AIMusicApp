@@ -21,9 +21,6 @@ public class UploadSongReqDto
     public required string artist { get; set; } = string.Empty;
     
     [Required]
-    public required int bpm { get; set; }
-    
-    [Required]
     public required bool isPublic { get; set; }
     
     public IFormFile? image { get; set; }

@@ -7,3 +7,5 @@ langchain-core
 ollama
 langchain-classic
 pytest
+librosa
+python-multipart
