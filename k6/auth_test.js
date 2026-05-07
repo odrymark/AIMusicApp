@@ -7,7 +7,7 @@ const errorRate = new Rate('errors');
 const loginDuration = new Trend('login_duration');
 const refreshDuration = new Trend('refresh_duration');
 
-const BASE_URL = __ENV.BASE_URL || 'http://167.86.77.173:8080';
+const BASE_URL = __ENV.BASE_URL || 'http://173.212.255.171:8080';
 
 const users = new SharedArray('users', function () {
   return [
