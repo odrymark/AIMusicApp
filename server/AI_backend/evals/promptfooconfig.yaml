@@ -15,7 +15,7 @@ tests:
       - type: icontains
         value: "happy"
       - type: javascript
-        value: "output.trim().split(/\\s+/).length <= 2 ? 1 : 0"
+        value: "output.trim().split(/\\s+/).length === 1 ? 1 : 0"
 
   - vars:
       prompt: "Classify the mood of this song. lyrics=I miss you every day, the rain keeps falling down. Your empty chair, your faded photo, nothing feels the same. I walk the streets we used to share, calling out your name. The silence is the loudest thing I've ever known., bpm=60"
@@ -23,7 +23,7 @@ tests:
       - type: icontains
         value: "sad"
       - type: javascript
-        value: "output.length < 50 ? 1 : 0"
+        value: "output.trim().split(/\\s+/).length === 1 ? 1 : 0"
 
   - vars:
       prompt: "Classify the mood of this song. lyrics=Fight back, stand tall, never gonna fall! They pushed me down but I rose again, fists clenched and eyes burning red. Fed up with the lies, done playing dead, screaming at the walls til my throat bleeds., bpm=170"
