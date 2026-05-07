@@ -4,8 +4,8 @@ A web application where users can upload their own songs, create playlists and l
 
 | Service  | URL |
 |----------|-----|
-| Frontend | http://167.86.77.173 |
-| Backend  | http://167.86.77.173:8080 |
+| Frontend | http://173.212.255.171 |
+| Backend  | http://173.212.255.171:8080 |
 
 ## Tech-stack
 The project uses:
