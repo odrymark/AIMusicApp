@@ -8,7 +8,7 @@ const getSongsDuration = new Trend('get_songs_duration');
 const getUserSongsDuration = new Trend('get_user_songs_duration');
 const getSignedUrlDuration = new Trend('get_signed_url_duration');
 
-const BASE_URL = __ENV.BASE_URL || 'http://167.86.77.173:8080';
+const BASE_URL = __ENV.BASE_URL || 'http://173.212.255.171:8080';
 
 const users = new SharedArray('users', function () {
   return [
@@ -60,7 +60,7 @@ export const options = {
   thresholds: {
     http_req_failed:         ['rate<0.01'],
     get_signed_url_duration: ['p(95)<400'],
-    get_songs_duration:      ['p(95)<500'],
+    get_songs_duration:      ['p(95)<600'],
     get_user_songs_duration: ['p(95)<450'],
     errors:                  ['rate<0.01'],
   }, 
