@@ -52,9 +52,12 @@ async def recommend_songs(input: RecommendInputModel) -> RecommendOutputModel:
 
 @app.post("/bpm")
 async def get_bpm(file: UploadFile):
-    audio, sr = librosa.load(file.file)
-    tempo, _ = librosa.beat.beat_track(y=audio, sr=sr)
-    return {"bpm": round(float(tempo.item()))}
+    try:
+        audio, sr = librosa.load(file.file)
+        tempo, _ = librosa.beat.beat_track(y=audio, sr=sr)
+        return {"bpm": round(float(tempo.item()))}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

@@ -9,3 +9,4 @@ langchain-classic
 pytest
 librosa
 python-multipart
+numpy
