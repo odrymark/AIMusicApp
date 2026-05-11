@@ -6,8 +6,7 @@ _store: List[dict] = []
 
 
 def index_songs(songs: List[dict]) -> None:
-    global _store
-    _store = []
+    _store.clear()
     for song in songs:
         text = song.get("mood", "unknown")
         embedding = embed_text(text)

@@ -57,6 +57,8 @@ async def get_bpm(file: UploadFile):
         tempo, _ = librosa.beat.beat_track(y=audio, sr=sr)
         return {"bpm": round(float(tempo.item()))}
     except Exception as e:
+        print(f"ERROR in get_bpm: {e}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

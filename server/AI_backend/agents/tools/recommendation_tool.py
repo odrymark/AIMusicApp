@@ -1,10 +1,13 @@
+from typing import List
+
+import ollama
 from langchain_core.tools import tool
+
 from tools.embedder import embed_text
 from tools.vector_store import index_songs, similarity_search
-from typing import List
-import ollama
 
 client = ollama.Client(host="http://ollama:11434")
+
 
 @tool
 def recommendation_tool(listened_moods: List[str], available_songs: List[dict]) -> str:
