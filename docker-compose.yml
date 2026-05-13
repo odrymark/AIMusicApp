@@ -58,9 +58,6 @@ services:
     depends_on:
       - ollama-init
       - mcp_server
-    environment:
-      - MCP_SERVER_URL=http://mcp_server:8001/mcp
-      - OLLAMA_HOST=http://ollama:11434
     restart: always
     networks:
       - app-network

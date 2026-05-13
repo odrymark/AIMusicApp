@@ -23,7 +23,7 @@ async def get_song_context(title: str, artist: str) -> str:
         search_response = await client.get(
             "https://musicbrainz.org/ws/2/recording/",
             params={"query": f"recording:{title} AND artist:{artist}", "fmt": "json", "limit": 1},
-            headers={"User-Agent": "SongApp/1.0 ( grendimso@gmail.com )"}
+            headers={"User-Agent": "SongApp/1.0 ( musicapp@gmail.com )"}
         )
         data = search_response.json()
         recordings = data.get("recordings", [])
@@ -36,7 +36,7 @@ async def get_song_context(title: str, artist: str) -> str:
         lookup_response = await client.get(
             f"https://musicbrainz.org/ws/2/recording/{mbid}",
             params={"inc": "genres", "fmt": "json"},
-            headers={"User-Agent": "SongApp/1.0 ( grendimso@gmail.com )"}
+            headers={"User-Agent": "SongApp/1.0 ( musicapp@gmail.com )"}
         )
         recording = lookup_response.json()
         genres = recording.get("genres", [])
