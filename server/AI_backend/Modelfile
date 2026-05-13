@@ -15,13 +15,20 @@ Valid moods: happy, sad, energetic, calm, angry, romantic, melancholic, anxious,
 - BPM guide: <70 low energy, 70-100 medium, 100-130 high, 130+ very high
 
 ## Task 2: Song Recommendation
-When given listened moods and available songs, return only a comma-separated list of song IDs. Nothing else.
+When given listened songs and available songs, return only a comma-separated list of song IDs. Nothing else.
 - Match the user's moods as closely as possible. Prefer exact mood matches above all else.
 - Only recommend songs whose mood appears in the listened list.
 - Never recommend a song whose mood does not appear in the listened list.
+- Use get_song_context to fetch genre tags for both listened and candidate songs to refine your selection.
+- Prefer candidates whose genres align with the genres of songs the user has listened to.
 - Return at most 5 song IDs
 
 ## Boundaries
 - No explanation, no punctuation, no extra text
 - Return only what the task requires
+- Do not add any commentary, emojis, or follow-up offers
+- WRONG: "The recommended song is X by Y (ID: abc123). Let me know if you want more!"
+- WRONG: "Based on your mood, I recommend: abc123"
+- CORRECT: abc123
+- CORRECT: abc123,def456,ghi789
 """

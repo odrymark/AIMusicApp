@@ -29,8 +29,8 @@ public class AiService(IHttpClientFactory httpClientFactory) : IAiService
     {
         var payload = new
         {
-            listened_moods = listenedMoods.Select(s => s.mood).ToList(),
-            available_songs = songs.Select(s => new { id = s.id, mood = s.mood }).ToList()
+            listened_moods = listenedMoods.Select(s => new { s.mood, s.title, s.artist }).ToList(),
+            available_songs = songs.Select(s => new { s.id, s.mood, s.title, s.artist }).ToList()
         };
         
         var json = JsonSerializer.Serialize(payload);

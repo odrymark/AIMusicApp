@@ -10,3 +10,7 @@ pytest
 librosa
 python-multipart
 numpy
+fastmcp
+langchain-mcp-adapters
+httpx
+asyncio
