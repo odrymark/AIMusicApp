@@ -35,17 +35,6 @@ export default function Home() {
             setSongs(songsWithUrls);
         }).finally(() => setSongsLoading(false));
 
-        getRecommendedSongs().then(async (res) => {
-            const songsWithUrls = await Promise.all(
-                res.map(async (song) => ({
-                    ...song,
-                    songUrl: await getSignedUrl(song.songKey),
-                    image: song.image ? await getSignedUrl(song.image) : null,
-                }))
-            );
-            setRecommendedSongs(songsWithUrls);
-        }).finally(() => setRecommendationsLoading(false));
-
         getPlaylists().then(async (res) => {
             const playlistsWithUrls = await Promise.all(
                 res.map(async (playlist) => ({
@@ -62,6 +51,23 @@ export default function Home() {
             );
             setPlaylists(playlistsWithUrls);
         }).finally(() => setPlaylistsLoading(false));
+    }, []);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setRecommendedSongs([]);
+        setRecommendationsLoading(true);
+
+        getRecommendedSongs().then(async (res) => {
+            const songsWithUrls = await Promise.all(
+                res.map(async (song) => ({
+                    ...song,
+                    songUrl: await getSignedUrl(song.songKey),
+                    image: song.image ? await getSignedUrl(song.image) : null,
+                }))
+            );
+            setRecommendedSongs(songsWithUrls);
+        }).finally(() => setRecommendationsLoading(false));
     }, [user]);
 
     const handlePlayPlaylist = (playlist: Playlist) => {

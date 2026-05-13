@@ -22,7 +22,7 @@ app.add_middleware(
 @app.post("/classify", response_model=MoodOutputModel)
 async def classify_mood(input: MoodInputModel) -> MoodOutputModel:
     try:
-        mood = agent.run(f"Classify the mood of this song. lyrics={input.lyrics}, bpm={input.bpm}")
+        mood = await agent.run(f"Classify the mood of this song. lyrics={input.lyrics}, bpm={input.bpm}")
         if not mood:
             raise HTTPException(status_code=500, detail="Model returned empty mood")
         return MoodOutputModel(mood=mood)
@@ -36,7 +36,7 @@ async def classify_mood(input: MoodInputModel) -> MoodOutputModel:
 @app.post("/recommend", response_model=RecommendOutputModel)
 async def recommend_songs(input: RecommendInputModel) -> RecommendOutputModel:
     try:
-        raw = agent.run(f"Recommend songs. listened={input.listened_moods}, available={input.available_songs}")
+        raw = await agent.run(f"Recommend songs. listened={input.listened_moods}, available={input.available_songs}")
         if not raw:
             raise HTTPException(status_code=500, detail="Model returned empty recommendations")
         song_ids = [s.strip() for s in raw.split(",") if s.strip()]
