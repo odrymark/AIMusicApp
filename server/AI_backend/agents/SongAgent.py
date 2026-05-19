@@ -40,8 +40,10 @@ class SongAgent:
         if isinstance(output, list):
             for block in output:
                 if isinstance(block, dict) and block.get("type") == "text":
-                    return block["text"]
-        return str(output)
+                    return block["text"].strip()
+        if isinstance(output, dict) and output.get("type") == "text":
+            return output["text"].strip()
+        return str(output).strip()
 
     def run_sync(self, user_input: str) -> str:
         return asyncio.run(self.run(user_input))
