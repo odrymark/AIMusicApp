@@ -29,10 +29,25 @@ public partial class SongMetadataService(GeniusClient genius, IHttpClientFactory
     public async Task<string> GetLyrics(string title, string artist)
     {
         var song = await genius.GetSong(title, artist);
-        Console.WriteLine($"[DEBUG] Song found: {song != null}, raw lyrics length: {song?.Lyrics?.Length}, preview: {song?.Lyrics?[..Math.Min(200, song?.Lyrics?.Length ?? 0)]}");
         var cleanLyrics = CleanLyrics(song?.Lyrics);
-        Console.WriteLine($"[DEBUG] Clean lyrics length: {cleanLyrics?.Length}");
-        return cleanLyrics ?? string.Empty;
+    
+        if (!string.IsNullOrWhiteSpace(cleanLyrics))
+            return cleanLyrics;
+
+        var client = httpClientFactory.CreateClient();
+        var encodedTitle = Uri.EscapeDataString(title);
+        var encodedArtist = Uri.EscapeDataString(artist);
+        var response = await client.GetAsync($"https://api.lyrics.ovh/v1/{encodedArtist}/{encodedTitle}");
+    
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadFromJsonAsync<JsonObject>();
+            var lyrics = json?["lyrics"]?.GetValue<string>();
+            if (!string.IsNullOrWhiteSpace(lyrics))
+                return lyrics;
+        }
+
+        return "No lyrics available.";
     }
 
     public async Task<int> GetBpm(Stream audioStream)
