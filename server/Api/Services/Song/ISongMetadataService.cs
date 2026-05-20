@@ -29,7 +29,9 @@ public partial class SongMetadataService(GeniusClient genius, IHttpClientFactory
     public async Task<string> GetLyrics(string title, string artist)
     {
         var song = await genius.GetSong(title, artist);
+        Console.WriteLine($"[DEBUG] Song found: {song != null}, raw lyrics length: {song?.Lyrics?.Length}, preview: {song?.Lyrics?[..Math.Min(200, song?.Lyrics?.Length ?? 0)]}");
         var cleanLyrics = CleanLyrics(song?.Lyrics);
+        Console.WriteLine($"[DEBUG] Clean lyrics length: {cleanLyrics?.Length}");
         return cleanLyrics ?? string.Empty;
     }
 
