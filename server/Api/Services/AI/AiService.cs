@@ -14,6 +14,8 @@ public class AiService(IHttpClientFactory httpClientFactory) : IAiService
         var payload = new { lyrics, bpm };
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
+        
+        Console.WriteLine($"[DEBUG] Sending to /classify: {json}");
 
         var response = await _client.PostAsync("/classify", content);
 
