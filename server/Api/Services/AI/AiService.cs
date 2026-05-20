@@ -18,7 +18,11 @@ public class AiService(IHttpClientFactory httpClientFactory) : IAiService
         var response = await _client.PostAsync("/classify", content);
 
         if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"AI backend returned {response.StatusCode}", null, response.StatusCode);
+        {
+            var errorBody = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(
+                $"AI backend returned {response.StatusCode}: {errorBody}", null, response.StatusCode);
+        }
 
         var responseBody = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(responseBody);
@@ -39,7 +43,11 @@ public class AiService(IHttpClientFactory httpClientFactory) : IAiService
         var response = await _client.PostAsync("/recommend", content);
 
         if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"AI backend returned {response.StatusCode}", null, response.StatusCode);
+        {
+            var errorBody = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(
+                $"AI backend returned {response.StatusCode}: {errorBody}", null, response.StatusCode);
+        }
         
         var responseBody = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(responseBody);
