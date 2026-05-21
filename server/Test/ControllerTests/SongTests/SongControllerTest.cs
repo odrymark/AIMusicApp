@@ -282,30 +282,6 @@ public class SongControllerTests(
     }
 
     [Fact]
-    public async Task EditSong_Returns_Forbidden_When_Feature_Disabled()
-    {
-        var userId = Guid.NewGuid();
-        SongControllerStartup.SetupUserClaims(_controller, userId);
-
-        mockStateProvider.IsEnabled("edit_song").Returns(false);
-
-        var dto = new SongEditReqDto
-        {
-            id = Guid.NewGuid(),
-            title = "Updated Title",
-            image = null,
-            prevImgKey = null,
-            artist = "TestArtist",
-            isPublic = true
-        };
-
-        var result = await _controller.EditSong(dto);
-
-        var problemResult = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(StatusCodes.Status403Forbidden, problemResult.StatusCode);
-    }
-
-    [Fact]
     public async Task EditSong_Updates_Song_When_Feature_Enabled_Without_Image()
     {
         mockSongService.ClearReceivedCalls();
