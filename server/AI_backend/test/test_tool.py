@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import MagicMock, patch
 
 
@@ -27,34 +26,47 @@ class TestMoodClassifierTool:
             assert "180" in str(call_args)
 
 
+LISTENED = [{"mood": "sad", "title": "Song A", "artist": "Artist A"}]
+AVAILABLE = [{"id": "abc123", "mood": "sad", "title": "Song A", "artist": "Artist A"}]
+
+
 class TestRecommendationTool:
     def test_returns_song_ids(self):
-        with patch("agents.tools.recommendation_tool.client") as mock_client:
+        with patch("agents.tools.recommendation_tool.client") as mock_client, \
+                patch("agents.tools.recommendation_tool.index_songs"), \
+                patch("agents.tools.recommendation_tool.embed_text", return_value=[0.1] * 768), \
+                patch("agents.tools.recommendation_tool.similarity_search", return_value=[AVAILABLE[0]]):
             mock_client.chat.return_value = MagicMock(message=MagicMock(content="abc123,def456,ghi789"))
             from agents.tools.recommendation_tool import recommendation_tool
             result = recommendation_tool.invoke({
-                "listened_moods": ["sad", "happy"],
-                "available_songs": [{"id": "abc123"}, {"id": "def456"}]
+                "listened_moods": LISTENED,
+                "available_songs": AVAILABLE
             })
             assert result == "abc123,def456,ghi789"
 
     def test_strips_whitespace(self):
-        with patch("agents.tools.recommendation_tool.client") as mock_client:
+        with patch("agents.tools.recommendation_tool.client") as mock_client, \
+                patch("agents.tools.recommendation_tool.index_songs"), \
+                patch("agents.tools.recommendation_tool.embed_text", return_value=[0.1] * 768), \
+                patch("agents.tools.recommendation_tool.similarity_search", return_value=[AVAILABLE[0]]):
             mock_client.chat.return_value = MagicMock(message=MagicMock(content="  abc123  "))
             from agents.tools.recommendation_tool import recommendation_tool
             result = recommendation_tool.invoke({
-                "listened_moods": ["sad"],
-                "available_songs": [{"id": "abc123"}]
+                "listened_moods": LISTENED,
+                "available_songs": AVAILABLE
             })
             assert result == "abc123"
 
     def test_passes_moods_and_songs(self):
-        with patch("agents.tools.recommendation_tool.client") as mock_client:
+        with patch("agents.tools.recommendation_tool.client") as mock_client, \
+                patch("agents.tools.recommendation_tool.index_songs"), \
+                patch("agents.tools.recommendation_tool.embed_text", return_value=[0.1] * 768), \
+                patch("agents.tools.recommendation_tool.similarity_search", return_value=[AVAILABLE[0]]):
             mock_client.chat.return_value = MagicMock(message=MagicMock(content="abc123"))
             from agents.tools.recommendation_tool import recommendation_tool
             recommendation_tool.invoke({
-                "listened_moods": ["sad"],
-                "available_songs": [{"id": "abc123"}]
+                "listened_moods": LISTENED,
+                "available_songs": AVAILABLE
             })
             call_args = mock_client.chat.call_args
             assert "sad" in str(call_args)
