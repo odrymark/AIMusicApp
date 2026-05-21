@@ -83,7 +83,7 @@ builder.Services.AddHttpClient("AiBackend", client =>
     var url = builder.Configuration["AiBackend:BaseUrl"] 
               ?? throw new InvalidOperationException("AiBackend:BaseUrl is not configured");
     client.BaseAddress = new Uri(url);
-    client.Timeout = TimeSpan.FromMinutes(30);
+    client.Timeout = TimeSpan.FromMinutes(60);
 });
 
 var geniusApiKey = builder.Configuration["Genius:APIKey"];
