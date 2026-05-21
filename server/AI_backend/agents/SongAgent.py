@@ -9,16 +9,13 @@ MCP_SERVER_URL = "http://mcp_server:8001/mcp"
 class SongAgent:
     def __init__(self):
         self.llm = ChatOllama(model="song-model", base_url="http://ollama:11434")
-
-    async def run(self, user_input: str) -> str:
-        client = MultiServerMCPClient({
+        self.client = MultiServerMCPClient({
             "song-mcp": {
                 "url": MCP_SERVER_URL,
                 "transport": "streamable_http",
             }
         })
-        tools = await client.get_tools()
-        prompt = ChatPromptTemplate.from_messages([
+        self.prompt = ChatPromptTemplate.from_messages([
             ("system", (
                 "You are a music analysis assistant. "
                 "Use the available tools to classify song mood and recommend songs based on listening history. "
@@ -33,7 +30,16 @@ class SongAgent:
             ("human", "{input}"),
             MessagesPlaceholder("agent_scratchpad"),
         ])
-        agent = create_tool_calling_agent(llm=self.llm, tools=tools, prompt=prompt)
+        self._tools = None
+
+    async def _get_tools(self):
+        if self._tools is None:
+            self._tools = await self.client.get_tools()
+        return self._tools
+
+    async def run(self, user_input: str) -> str:
+        tools = await self._get_tools()
+        agent = create_tool_calling_agent(llm=self.llm, tools=tools, prompt=self.prompt)
         executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
         result = await executor.ainvoke({"input": user_input})
         output = result["output"]

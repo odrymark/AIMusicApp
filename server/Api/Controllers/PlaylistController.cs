@@ -11,7 +11,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/playlist")]
-public class PlaylistController(IPlaylistService playlistService, IR2Service r2Service, IFeatureStateProvider stateProvider) : ControllerBase
+public class PlaylistController(IPlaylistService playlistService, IR2Service r2Service) : ControllerBase
 {
     [HttpGet("getPlaylists")]
     public async Task<IActionResult> GetPlaylists()
@@ -73,13 +73,6 @@ public class PlaylistController(IPlaylistService playlistService, IR2Service r2S
     [Authorize]
     public async Task<IActionResult> EditPlaylist([FromForm] PlaylistEditReqDto dto)
     {
-        if (!stateProvider.IsEnabled("edit_playlist"))
-            return Problem(
-                detail: "Playlist editing is currently not available",
-                statusCode: StatusCodes.Status403Forbidden,
-                title: "Feature Disabled"
-            );
-        
         try
         {
             var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

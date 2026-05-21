@@ -18,7 +18,6 @@ public class SongController(
     IR2Service r2Service,
     ISongService songService,
     IAiService aiService,
-    IFeatureStateProvider stateProvider,
     ISongMetadataService metadataService) : ControllerBase
 {
     [Authorize]
@@ -162,13 +161,6 @@ public class SongController(
     [HttpPost("editSong")]
     public async Task<IActionResult> EditSong([FromForm] SongEditReqDto dto)
     {
-        if (!stateProvider.IsEnabled("edit_song"))
-            return Problem(
-                detail: "Song editing is currently not available",
-                statusCode: StatusCodes.Status403Forbidden,
-                title: "Feature Disabled"
-            );
-        
         try
         {
             var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

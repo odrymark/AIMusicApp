@@ -15,7 +15,7 @@ export default function EditSong() {
     const [prevImgKey, setPrevImgKey] = useState<string | undefined>(undefined);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [isSongEditOn, setIsSongEditOn] = useState(false);
+    const [isSongEditOn, setIsSongEditOn] = useState(true);
 
     const editSongFeatureKey = "edit_song";
 
