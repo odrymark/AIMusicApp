@@ -7,10 +7,16 @@ A web application where users can upload their own songs, create playlists and l
 | Frontend | http://173.212.255.171 |
 | Backend  | http://173.212.255.171:8080 |
 
+## Known Issues with VPS
+Since the server does not have a GPU, the LLM runs on the CPU, resulting in long waiting times for mood classification when uploading songs and even longer for song recommendation.
+Genius API blocks Contabo IP ranges, so the lyrics fetching will fall back to using lyrics.ovh, which has worse lyrics data and can lead to unknown moods.
+
 ## Tech-stack
 The project uses:
 - .NET 9 for the backend
 - React for the frontend
+- Python for the AI backend
+- Ollama for the LLM provider
 - PostgreSQL as the database
 - Neon for the database provider
 - CloudFlare R2 for storing songs
@@ -18,6 +24,7 @@ The project uses:
 - Contabo for VPS
 - k6 for load/performance testing
 - TestCafe for end-to-end browser testing
+- Genius API for lyrics fetching
 
 ## Architecture
 Frontend (React):
@@ -75,59 +82,3 @@ The repository includes three GitHub Copilot agentic workflows that run on a dai
 - **Daily Documentation Updater** (`.github/workflows/daily-doc-updater.md`) — Scans merged pull requests and commits from the last 24 hours, identifies undocumented changes, and opens a pull request to update the documentation.
 
 - **Code Simplifier** (`.github/workflows/code-simplifier.md`) — Analyzes recently modified code and creates pull requests with simplifications that improve clarity, consistency, and maintainability while preserving functionality.
-
-## Feature plan
-
-### Week 5
-*Kick-off week - no features to be planned here*
-
-### Week 6
-**Feature 1:** Initial backend and frontend
-
-**Feature 2:** Login, Create Account and Home Page
-
-### Week 7
-*Winter vacation - nothing planned.*
-
-### Week 8
-**Feature 1:** Database Setup
-
-**Feature 2:** User Login
-
-**Feature 3:** JWT Creation, Validation
-
-### Week 9
-**Feature 1:** Song Upload Page
-
-**Feature 2:** Saving songs to CloudFlare
-
-### Week 10
-**Feature 1:** Saving songs to DB
-
-**Feature 2:** Retrieving user's songs
-
-### Week 11
-**Feature 1:** Playing and controlling the user's own songs
-
-**Feature 2:** Main Page has playable songs from the db
-
-### Week 12
-**Feature 1:** Song cover images
-
-**Feature 2:** Edit Songs
-
-### Week 13
-**Feature 1:** Create Playlist
-
-**Feature 2:** Edit Playlist
-
-### Week 14
-*Easter vacation - nothing planned.*
-
-### Week 15
-**Feature 1:** k6 load tests and TestCafe E2E tests running against the VPS as part of the CI/CD pipeline
-
-**Feature 2:** Daily agentic workflows for repo status reporting and documentation updates
-
-### Week 16
-**Feature 1:** Featurehub toggles for song and playlist editing
