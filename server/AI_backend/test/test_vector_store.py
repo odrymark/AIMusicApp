@@ -52,28 +52,28 @@ class TestCosineSimilarity:
         """Identical vectors should yield a cosine similarity of 1.0."""
         vec = [1.0, 2.0, 3.0]
         similarity = vs._cosine_similarity(vec, vec)
-        assert pytest.approx(similarity) == 1.0
+        assert similarity == pytest.approx(1.0)
 
     def test_orthogonal_vectors(self):
         """Perpendicular vectors should yield a cosine similarity of 0.0."""
         vec_a = [1.0, 0.0]
         vec_b = [0.0, 1.0]
         similarity = vs._cosine_similarity(vec_a, vec_b)
-        assert pytest.approx(similarity) == 0.0
+        assert similarity == pytest.approx(0.0)
 
     def test_opposite_vectors(self):
         """Directly opposing vectors should yield a cosine similarity of -1.0."""
         vec_a = [1.0, 0.0]
         vec_b = [-1.0, 0.0]
         similarity = vs._cosine_similarity(vec_a, vec_b)
-        assert pytest.approx(similarity) == -1.0
+        assert similarity == pytest.approx(-1.0)
 
     def test_zero_vector_edge_case(self):
         """If a vector has a magnitude of zero, it should return 0.0 instead of throwing a DivisionByZero error."""
         vec_a = [0.0, 0.0]
         vec_b = [1.0, 2.0]
         similarity = vs._cosine_similarity(vec_a, vec_b)
-        assert similarity == 0.0
+        assert similarity == pytest.approx(0.0)
 
 
 class TestSimilaritySearch:
