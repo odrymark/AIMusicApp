@@ -18,7 +18,6 @@ public class SongController(
     IR2Service r2Service,
     ISongService songService,
     IAiService aiService,
-    IFeatureStateProvider stateProvider,
     ISongMetadataService metadataService) : ControllerBase
 {
     [Authorize]

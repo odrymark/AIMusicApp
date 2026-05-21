@@ -11,7 +11,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/playlist")]
-public class PlaylistController(IPlaylistService playlistService, IR2Service r2Service, IFeatureStateProvider stateProvider) : ControllerBase
+public class PlaylistController(IPlaylistService playlistService, IR2Service r2Service) : ControllerBase
 {
     [HttpGet("getPlaylists")]
     public async Task<IActionResult> GetPlaylists()
