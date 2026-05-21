@@ -14,3 +14,4 @@ fastmcp
 langchain-mcp-adapters
 httpx
 asyncio
+pytest-asyncio
