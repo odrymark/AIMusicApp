@@ -53,7 +53,12 @@ export default function Home() {
         }).finally(() => setPlaylistsLoading(false));
     }, []);
 
+    const prevUserRef = useRef<typeof user>(undefined);
+
     useEffect(() => {
+        if (prevUserRef.current !== undefined && prevUserRef.current?.id === user?.id) return;
+        prevUserRef.current = user;
+
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setRecommendedSongs([]);
         setRecommendationsLoading(true);

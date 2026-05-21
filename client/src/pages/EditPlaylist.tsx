@@ -18,7 +18,7 @@ export default function EditPlaylist() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
-    const [isPlaylistEditOn, setIsPlaylistEditOn] = useState(false);
+    const [isPlaylistEditOn, setIsPlaylistEditOn] = useState(true);
     const editPlaylistFeatureKey = "edit_playlist";
 
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);

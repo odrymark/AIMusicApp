@@ -15,8 +15,8 @@ export default function MyMusic() {
 
     const editSongFeatureKey = "edit_song";
     const editPlaylistFeatureKey = "edit_playlist";
-    const [isSongEditOn, setIsSongEditOn] = useState(false);
-    const [isPlaylistEditOn, setIsPlaylistEditOn] = useState(false);
+    const [isSongEditOn, setIsSongEditOn] = useState(true);
+    const [isPlaylistEditOn, setIsPlaylistEditOn] = useState(true);
 
     const [songs, setSongs] = useState<Song[]>([]);
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
