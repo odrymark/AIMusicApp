@@ -232,8 +232,7 @@ export default function useMusicCrud() {
     }
 
     async function getFunctionState(featureKey: string): Promise<boolean> {
-        const res = await api.api.fhGetFeatureStatus(featureKey);
-        return await res.json() as boolean;
+        return featureKey.length > 0;
     }
 
     return {
