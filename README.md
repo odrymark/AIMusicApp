@@ -8,7 +8,8 @@ A web application where users can upload their own songs, create playlists and l
 | Backend  | http://173.212.255.171:8080 |
 
 ## Known Issues with VPS
-Since the server does not have a GPU, the LLM runs on the CPU, resulting in long waiting times for mood classification when uploading songs and even longer for song recommendation.
+Since the server does not have a GPU, the LLM runs on the CPU (4 cores, 8GB RAM), resulting in long waiting times for both AI functionalities.
+Waiting time should be around 5 minutes for recommendation. Mood classification heavily depends on lyrics length and can be anywhere between 5 to 10 minutes.
 
 Genius API blocks Contabo IP ranges, so the lyrics fetching will fall back to using lyrics.ovh, which has worse lyrics data and can lead to unknown moods.
 
