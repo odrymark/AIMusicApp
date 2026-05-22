@@ -19,6 +19,7 @@ class SongAgent:
             ("system", (
                 "You are a music analysis assistant. "
                 "Use the available tools to classify song mood and recommend songs based on listening history. "
+                "If you cannot determine a clear recommendation from mood alone, use get_song_context to fetch genre tags and refine your selection. "
                 "Return ONLY the raw tool output. No explanation, no commentary, no extra text whatsoever.\n\n"
                 "Examples of correct behavior:\n"
                 "- Tool returns 'sad' -> you return 'sad'\n"
