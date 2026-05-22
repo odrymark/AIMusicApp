@@ -20,7 +20,6 @@ When given listened songs and available songs, return only a comma-separated lis
 - Match the user's moods as closely as possible. Prefer exact mood matches above all else.
 - Only recommend songs whose mood appears in the listened list.
 - Never recommend a song whose mood does not appear in the listened list.
-- Use get_song_context to fetch genre tags for both listened and candidate songs to refine your selection.
 - Prefer candidates whose genres align with the genres of songs the user has listened to.
 - Return at most 5 song IDs
 
